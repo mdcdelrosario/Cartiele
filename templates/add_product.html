@@ -1,0 +1,445 @@
+<!DOCTYPE html>
+<html lang="en">
+<head>
+<meta charset="UTF-8">
+<title>Add Product - Admin</title>
+
+<!-- Bootstrap CSS -->
+<link rel="stylesheet" href="{{ url_for('static', filename='css/bootstrap.min.css') }}">
+<!-- SweetAlert2 -->
+<script src="{{ url_for('static', filename='js/sweetalert2/dist/sweetalert2.all.min.js') }}"></script>
+<!-- Bootstrap Icons -->
+<link rel="stylesheet" href="{{ url_for('static', filename='css/bootstrap-icons.css') }}">
+
+<style>
+body {
+    font-family: 'Inter', sans-serif;
+    background: #f1f3f6;
+    font-size: 14px;
+    margin: 0;
+}
+
+.sidebar {
+    position: fixed;
+    left: 0;
+    top: 0;
+    width: 230px;
+    height: 100vh;
+    background: #111827;
+    padding: 20px 15px;
+    color: #fff;
+    overflow-y: auto;
+}
+
+.sidebar h5 {
+    text-align: center;
+    font-weight: 600;
+    margin-bottom: 30px;
+}
+
+.sidebar a {
+    display: flex;
+    align-items: center;
+    gap: 10px;
+    padding: 10px 14px;
+    border-radius: 10px;
+    margin-bottom: 6px;
+    color: #c7cbd6;
+    text-decoration: none;
+    font-size: 13.5px;
+}
+
+.sidebar a:hover,
+.sidebar a.active {
+    background: #1f2937;
+    color: #fff;
+}
+
+/* ------------------ MAIN CONTENT ------------------ */
+.main {
+    margin-left: 230px;
+    padding: 30px;
+    min-height: 100vh;
+}
+
+.card {
+    background: #fff;
+    border-radius: 14px;
+    padding: 30px;
+    box-shadow: 0 8px 20px rgba(0,0,0,0.08);
+}
+
+h2 {
+    color: #111827;
+    font-weight: 700;
+    margin-bottom: 20px;
+}
+
+/* Image preview styles */
+.image-preview {
+    display: flex;
+    flex-wrap: wrap;
+    gap: 10px;
+    margin-top: 10px;
+}
+
+.image-preview img {
+    width: 100px;
+    height: 100px;
+    object-fit: cover;
+    margin: 5px;
+    border: 1px solid #ccc;
+    padding: 2px;
+    border-radius: 5px;
+}
+
+/* Variation block styles */
+.variation-block {
+    border: 1px solid #ccc;
+    padding: 15px;
+    margin-bottom: 20px;
+    border-radius: 5px;
+    background: #f8f9fa;
+}
+
+/* Option block styles */
+.option-block {
+    display: flex;
+    gap: 10px;
+    margin-bottom: 10px;
+}
+
+.option-block input {
+    flex: 1;
+}
+
+.btn-custom {
+    border-radius: 8px;
+}
+
+/* Form styling */
+.form-label {
+    font-weight: 500;
+    margin-bottom: 8px;
+    color: #374151;
+}
+
+.form-control, .form-select {
+    border-radius: 8px;
+    border: 1px solid #d1d5db;
+    padding: 8px 12px;
+    font-size: 14px;
+}
+
+.form-control:focus, .form-select:focus {
+    border-color: #3b82f6;
+    box-shadow: 0 0 0 3px rgba(59, 130, 246, 0.1);
+}
+
+/* Responsive */
+@media (max-width: 768px) {
+    .sidebar {
+        width: 100%;
+        height: auto;
+        position: static;
+        margin-bottom: 20px;
+    }
+    
+    .main {
+        margin-left: 0;
+        padding: 15px;
+    }
+    
+    .card {
+        padding: 20px;
+    }
+}
+</style>
+</head>
+<body>
+
+<!-- ------------------ SIDEBAR ------------------ -->
+<div class="sidebar">
+    <h5>Admin Panel</h5>
+    <a href="/admin/dashboard#products" class="active"><i class="bi bi-box"></i> Products</a>
+    <a href="/admin/dashboard#users"><i class="bi bi-people"></i> Users</a>
+    <a href="/admin/dashboard#passwords"><i class="bi bi-key"></i> Password Requests</a>
+    <a href="/admin/dashboard#orders"><i class="bi bi-cart"></i> Orders</a>
+    <a href="/admin/dashboard#sales"><i class="bi bi-graph-up"></i> Sales</a>
+    <a href="/admin/dashboard#completed"><i class="bi bi-clock-history"></i> Orders History</a>
+    <hr class="text-secondary">
+    <a href="/catalog"><i class="bi bi-shop"></i> Catalog</a>
+    <a href="#" class="text-danger" onclick="confirmLogout(event)"><i class="bi bi-box-arrow-right"></i> Logout</a>
+</div>
+
+
+<!-- ------------------ MAIN CONTENT ------------------ -->
+<div class="main">
+    <div class="card">
+        <h4>Add Product</h4>
+        <form method="POST" enctype="multipart/form-data">
+            <div class="row g-4">
+                <!-- LEFT COLUMN -->
+                <div class="col-md-6">
+                    <div class="mb-3">
+                        <label class="form-label">Product Name</label>
+                        <input type="text" name="name" class="form-control" required>
+                    </div>
+
+                    <div class="mb-3">
+                        <label class="form-label">Base Price (₱)</label>
+                        <input type="number" name="price" class="form-control" step="0.01" min="0" required>
+                    </div>
+
+                    <div class="mb-3">
+                        <label class="form-label">Description</label>
+                        <textarea name="description" class="form-control" rows="5" required></textarea>
+                    </div>
+
+                    <div class="mb-3">
+                        <label class="form-label">Category</label>
+                        <select name="category" class="form-select" required>
+                            <option value="">-- Select Category --</option>
+                            <option>Clothing</option>
+                            <option>Electronics</option>
+                            <option>Personal Care & Beauty</option>
+                            <option>Groceries</option>
+                            <option>Appliances</option>
+                            <option>Toys/Sports</option>
+                            <option>Shoes & Footwear</option>
+                            <option>Home Collections</option>
+                            <option>Automotive</option>
+                            <option>Books</option>
+                        </select>
+                    </div>
+                </div>
+
+                <!-- RIGHT COLUMN -->
+                <div class="col-md-6">
+                    <div class="mb-4">
+                        <label class="form-label">Images</label>
+                        <!-- FIXED: Changed from images[] to images -->
+                        <input type="file" id="imageInput" name="images[]" class="form-control" multiple accept="image/*">
+                        <div id="preview" class="image-preview"></div>
+                        <small class="text-muted">Hold Ctrl/Cmd to select multiple images</small>
+                    </div>
+
+                    <h5 class="mb-3">Product Variations</h5>
+                    <div id="variations-wrapper"></div>
+                    
+                    <button type="button" class="btn btn-outline-secondary btn-sm" onclick="addVariation()">
+                        <i class="bi bi-plus"></i> Add Variation
+                    </button>
+                </div>
+            </div>
+
+            <div class="mt-4 d-flex gap-2 justify-content-end">
+                <button type="submit" class="btn btn-primary btn-custom">
+                    <i class="bi bi-check-circle"></i> Save Product
+                </button>
+                <a href="/admin/dashboard" class="btn btn-secondary btn-custom">
+                    <i class="bi bi-x-circle"></i> Back
+                </a>
+            </div>
+        </form>
+    </div>
+</div>
+
+<script>
+/* IMAGE PREVIEW */
+const imageInput = document.getElementById("imageInput");
+const preview = document.getElementById("preview");
+
+imageInput.addEventListener("change", function () {
+    preview.innerHTML = ""; // Clear previous preview
+
+    if (this.files.length === 0) return;
+
+    // Create the preview label
+    const previewTitle = document.createElement('div');
+    previewTitle.className = 'w-100 mb-2 text-muted';
+    previewTitle.textContent = `Selected ${this.files.length} image(s)`;
+    preview.appendChild(previewTitle);
+
+    [...this.files].forEach(file => {
+        // Validate file type
+        if (!file.type.startsWith('image/')) {
+            Swal.fire({
+                icon: 'warning',
+                title: 'Invalid File',
+                text: 'Please select only image files',
+                confirmButtonText: 'OK'
+            });
+            return;
+        }
+
+        // Validate file size (5MB limit)
+        if (file.size > 5 * 1024 * 1024) {
+            Swal.fire({
+                icon: 'warning',
+                title: 'File Too Large',
+                text: 'Image must be less than 5MB',
+                confirmButtonText: 'OK'
+            });
+            return;
+        }
+
+        const reader = new FileReader();
+        reader.onload = e => {
+            const img = document.createElement("img");
+            img.src = e.target.result;
+            preview.appendChild(img);
+        };
+        reader.readAsDataURL(file);
+    });
+
+    // Show number of selected images
+    if (this.files.length > 0) {
+        const previewTitle = document.createElement('div');
+        previewTitle.className = 'w-100 mb-2 text-muted';
+        previewTitle.textContent = `Selected ${this.files.length} image(s)`;
+        preview.insertBefore(previewTitle, preview.firstChild);
+    }
+});
+
+/* VARIATIONS */
+let variationIndex = 0;
+
+function addVariation() {
+    const wrapper = document.getElementById("variations-wrapper");
+
+    const div = document.createElement("div");
+    div.className = "variation-block";
+
+    div.innerHTML = `
+        <label class="form-label">Variation Name:</label>
+        <input type="text" name="variation_name[]" class="form-control" required placeholder="e.g., Size, Color, Model">
+        
+        <div class="d-flex justify-content-between align-items-center mb-2 mt-3">
+            <strong>Options</strong>
+            <button type="button" class="btn btn-danger btn-sm" onclick="this.parentNode.parentNode.remove()">
+                <i class="bi bi-trash"></i> Remove Variation
+            </button>
+        </div>
+        
+        <div id="options-${variationIndex}"></div>
+        
+        <button type="button" class="btn btn-outline-secondary btn-sm mt-2" onclick="addOption(${variationIndex})">
+            <i class="bi bi-plus"></i> Add Option
+        </button>
+    `;
+
+    wrapper.appendChild(div);
+    variationIndex++;
+}
+
+function addOption(varIndex) {
+    const optionsDiv = document.getElementById(`options-${varIndex}`);
+
+    const opt = document.createElement("div");
+    opt.className = "option-block";
+
+    opt.innerHTML = `
+        <input type="text"
+               name="variation_options_${varIndex}[]"
+               class="form-control"
+               placeholder="Option (e.g. 8GB/256GB)"
+               required>
+
+        <input type="number"
+               name="variation_stock_${varIndex}[]"
+               class="form-control"
+               placeholder="Stock"
+               min="0"
+               required>
+
+        <input type="number"
+               name="variation_price_${varIndex}[]"
+               class="form-control"
+               placeholder="Extra Price"
+               min="0"
+               step="0.01"
+               value="0"
+               required>
+
+        <button type="button" class="btn btn-danger btn-sm" onclick="this.parentNode.remove()">
+            <i class="bi bi-x"></i>
+        </button>
+    `;
+
+    optionsDiv.appendChild(opt);
+}
+
+// LOGOUT CONFIRM
+function confirmLogout(e) {
+    e.preventDefault();
+    Swal.fire({
+        title: "Logout?",
+        text: "Are you sure you want to logout?",
+        icon: "warning",
+        showCancelButton: true,
+        confirmButtonColor: "#dc3545",
+        cancelButtonColor: "#6c757d",
+        confirmButtonText: "Yes, logout",
+        cancelButtonText: "Cancel"
+    }).then(res => {
+        if (res.isConfirmed) window.location.href = "/admin/logout";
+    });
+}
+
+// Form validation
+document.querySelector('form').addEventListener('submit', function(e) {
+    // Validate at least one image
+    if (imageInput.files.length === 0) {
+        e.preventDefault();
+        Swal.fire({
+            icon: 'warning',
+            title: 'No Images',
+            text: 'Please select at least one product image',
+            confirmButtonText: 'OK'
+        });
+        return;
+    }
+    
+    // Validate image sizes
+    let hasLargeFile = false;
+    [...imageInput.files].forEach(file => {
+        if (file.size > 5 * 1024 * 1024) {
+            hasLargeFile = true;
+        }
+    });
+    
+    if (hasLargeFile) {
+        e.preventDefault();
+        Swal.fire({
+            icon: 'warning',
+            title: 'Large File',
+            text: 'One or more images exceed 5MB limit',
+            confirmButtonText: 'OK'
+        });
+        return;
+    }
+    
+    // Show loading state
+    const submitBtn = this.querySelector('button[type="submit"]');
+    const originalText = submitBtn.innerHTML;
+    submitBtn.innerHTML = '<i class="bi bi-hourglass-split"></i> Saving...';
+    submitBtn.disabled = true;
+    
+    // Re-enable after 5 seconds if something goes wrong
+    setTimeout(() => {
+        if (submitBtn.disabled) {
+            submitBtn.innerHTML = originalText;
+            submitBtn.disabled = false;
+        }
+    }, 5000);
+});
+
+// Add initial variation on load
+document.addEventListener('DOMContentLoaded', function() {
+    addVariation();
+});
+</script>
+
+</body>
+</html>

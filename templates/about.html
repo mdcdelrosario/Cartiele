@@ -1,0 +1,826 @@
+<!DOCTYPE html>
+<html lang="en">
+<head>
+    <meta charset="UTF-8">
+    <meta name="viewport" content="width=device-width, initial-scale=1.0">
+    <title>About Us</title>
+    
+   <link rel="stylesheet" href="{{ url_for('static', filename='css/bootstrap.min.css') }}">
+    <script src="{{ url_for('static', filename='js/sweetalert2/dist/sweetalert2.all.min.js') }}"></script>
+    <script src="{{ url_for('static', filename='js/bootstrap.bundle.min.js') }}"></script>
+
+    <style>
+        :root {
+            --primary: #4f46e5;
+            --primary-dark: #4338ca;
+            --secondary: #f8fafc;
+            --accent: #f97316;
+            --text-dark: #334155;
+            --text-light: #64748b;
+            --border: #e2e8f0;
+            --shadow: 0 4px 12px rgba(0, 0, 0, 0.05);
+            --shadow-hover: 0 8px 24px rgba(0, 0, 0, 0.1);
+            --radius: 10px;
+            --transition: all 0.25s ease;
+        }
+        
+        body {
+            background: #f9fafb;
+            font-family: -apple-system, BlinkMacSystemFont, 'Segoe UI', Roboto, sans-serif;
+            color: var(--text-dark);
+            line-height: 1.5;
+        }
+        
+        /* ================= NAVBAR ================= */
+        .navbar {
+            background: white;
+            padding: 0.75rem 1.5rem;
+            box-shadow: 0 2px 10px rgba(0,0,0,0.05);
+            border-bottom: 1px solid var(--border);
+        }
+        
+        .navbar-brand img {
+            height: 50px;
+            width: auto;
+        }
+        
+        .nav-link {
+            font-weight: 500;
+            font-size: 0.95rem;
+            color: var(--text-dark);
+            padding: 0.5rem 0.75rem !important;
+        }
+        
+        .nav-link:hover, .nav-link.active {
+            color: var(--primary);
+        }
+        
+        .cart-badge {
+            position: absolute;
+            top: -5px;
+            right: -5px;
+            background: var(--accent);
+            color: white;
+            font-size: 0.7rem;
+            width: 16px;
+            height: 16px;
+            border-radius: 50%;
+            display: flex;
+            align-items: center;
+            justify-content: center;
+        }
+        
+        /* ================= HERO SECTION ================= */
+        .hero-section {
+            background: linear-gradient(rgba(255, 255, 255, 0.9), rgba(255, 255, 255, 0.95)),
+                        url("https://images.unsplash.com/photo-1441986300917-64674bd600d8?ixlib=rb-1.2.1&auto=format&fit=crop&w=2000&q=80");
+            background-size: cover;
+            background-position: center;
+            background-attachment: fixed;
+            padding: 5rem 0 4rem;
+            text-align: center;
+            position: relative;
+            overflow: hidden;
+        }
+        
+        .hero-section::before {
+            content: '';
+            position: absolute;
+            top: 0;
+            left: 0;
+            right: 0;
+            bottom: 0;
+            background: rgba(79, 70, 229, 0.03);
+            z-index: -1;
+        }
+        
+        .hero-title {
+            font-weight: 800;
+            font-size: 3.5rem;
+            color: var(--primary-dark);
+            margin-bottom: 1rem;
+            line-height: 1.1;
+        }
+        
+        .hero-subtitle {
+            font-size: 1.25rem;
+            color: var(--text-light);
+            max-width: 700px;
+            margin: 0 auto 2rem;
+            font-weight: 400;
+        }
+        
+        /* ================= SECTION STYLES ================= */
+        .section {
+            padding: 4rem 0;
+            position: relative;
+        }
+        
+        .section-alt {
+            background: var(--secondary);
+        }
+        
+        .section-dark {
+            background: var(--primary-dark);
+            color: white;
+        }
+        
+        .section-header {
+            text-align: center;
+            margin-bottom: 3rem;
+        }
+        
+        .section-title {
+            font-weight: 700;
+            font-size: 2.5rem;
+            color: var(--text-dark);
+            margin-bottom: 1rem;
+            position: relative;
+            display: inline-block;
+        }
+        
+        .section-title::after {
+            content: '';
+            position: absolute;
+            bottom: -10px;
+            left: 50%;
+            transform: translateX(-50%);
+            width: 60px;
+            height: 4px;
+            background: var(--accent);
+            border-radius: 2px;
+        }
+        
+        .section-title-light {
+            color: white;
+        }
+        
+        .section-title-light::after {
+            background: white;
+        }
+        
+        .section-subtitle {
+            color: var(--text-light);
+            font-size: 1.1rem;
+            max-width: 800px;
+            margin: 0 auto;
+            line-height: 1.6;
+        }
+        
+        .section-subtitle-light {
+            color: rgba(255, 255, 255, 0.9);
+        }
+        
+        /* ================= CONTENT BLOCKS ================= */
+        .content-block {
+            max-width: 800px;
+            margin: 0 auto;
+        }
+        
+        .content-text {
+            font-size: 1.1rem;
+            color: var(--text-dark);
+            margin-bottom: 1.5rem;
+            line-height: 1.8;
+        }
+        
+        .content-text-light {
+            color: rgba(255, 255, 255, 0.9);
+        }
+        
+        /* ================= MISSION HIGHLIGHT ================= */
+        .mission-highlight {
+            background: white;
+            border-radius: var(--radius);
+            padding: 2.5rem;
+            margin: 3rem 0;
+            box-shadow: var(--shadow);
+            border-left: 4px solid var(--primary);
+            position: relative;
+        }
+        
+        .mission-highlight::before {
+            content: '"';
+            position: absolute;
+            top: -20px;
+            left: 2rem;
+            font-size: 4rem;
+            color: var(--primary);
+            font-family: Georgia, serif;
+            opacity: 0.2;
+        }
+        
+        .mission-text {
+            font-size: 1.25rem;
+            color: var(--text-dark);
+            line-height: 1.7;
+            font-style: italic;
+            margin: 0;
+        }
+        
+        /* ================= IMAGE GALLERY ================= */
+        .image-gallery {
+            display: grid;
+            grid-template-columns: repeat(auto-fit, minmax(300px, 1fr));
+            gap: 1.5rem;
+            margin: 3rem 0;
+        }
+        
+        .gallery-item {
+            position: relative;
+            overflow: hidden;
+            border-radius: var(--radius);
+            height: 300px;
+            box-shadow: var(--shadow);
+            transition: var(--transition);
+        }
+        
+        .gallery-item:hover {
+            transform: translateY(-5px);
+            box-shadow: var(--shadow-hover);
+        }
+        
+        .gallery-item img {
+            width: 100%;
+            height: 100%;
+            object-fit: cover;
+            transition: transform 0.5s ease;
+        }
+        
+        .gallery-item:hover img {
+            transform: scale(1.05);
+        }
+        
+        .gallery-caption {
+            position: absolute;
+            bottom: 0;
+            left: 0;
+            right: 0;
+            background: linear-gradient(transparent, rgba(0, 0, 0, 0.8));
+            color: white;
+            padding: 1.5rem;
+            transform: translateY(100%);
+            transition: transform 0.3s ease;
+        }
+        
+        .gallery-item:hover .gallery-caption {
+            transform: translateY(0);
+        }
+        
+        .gallery-caption h4 {
+            font-weight: 600;
+            margin-bottom: 0.25rem;
+            font-size: 1.1rem;
+        }
+        
+        .gallery-caption p {
+            font-size: 0.9rem;
+            opacity: 0.9;
+            margin: 0;
+        }
+        
+        /* ================= VALUES GRID ================= */
+        .values-grid {
+            display: grid;
+            grid-template-columns: repeat(auto-fit, minmax(250px, 1fr));
+            gap: 2rem;
+            margin: 3rem 0;
+        }
+        
+        .value-card {
+            background: white;
+            border-radius: var(--radius);
+            padding: 2rem;
+            box-shadow: var(--shadow);
+            border: 1px solid var(--border);
+            transition: var(--transition);
+            text-align: center;
+        }
+        
+        .value-card:hover {
+            transform: translateY(-8px);
+            box-shadow: var(--shadow-hover);
+            border-color: var(--primary);
+        }
+        
+        .value-icon {
+            font-size: 2.5rem;
+            color: var(--primary);
+            margin-bottom: 1.5rem;
+            display: inline-block;
+        }
+        
+        .value-title {
+            font-weight: 600;
+            font-size: 1.25rem;
+            color: var(--text-dark);
+            margin-bottom: 1rem;
+        }
+        
+        .value-description {
+            color: var(--text-light);
+            font-size: 0.95rem;
+            line-height: 1.6;
+            margin: 0;
+        }
+        
+        /* ================= STATS SECTION ================= */
+        .stats-grid {
+            display: grid;
+            grid-template-columns: repeat(auto-fit, minmax(200px, 1fr));
+            gap: 2rem;
+        }
+        
+        .stat-card {
+            text-align: center;
+            padding: 2rem;
+            background: rgba(255, 255, 255, 0.1);
+            border-radius: var(--radius);
+            backdrop-filter: blur(10px);
+        }
+        
+        .stat-number {
+            font-weight: 800;
+            font-size: 3rem;
+            color: white;
+            line-height: 1;
+            margin-bottom: 0.5rem;
+            text-shadow: 2px 2px 4px rgba(0, 0, 0, 0.2);
+        }
+        
+        .stat-label {
+            font-size: 0.9rem;
+            color: rgba(255, 255, 255, 0.9);
+            text-transform: uppercase;
+            letter-spacing: 1px;
+            font-weight: 500;
+        }
+        
+        /* ================= TEAM GRID ================= */
+        .team-grid {
+            display: grid;
+            grid-template-columns: repeat(auto-fit, minmax(250px, 1fr));
+            gap: 2rem;
+            margin: 3rem 0;
+        }
+        
+        .team-card {
+            background: white;
+            border-radius: var(--radius);
+            overflow: hidden;
+            box-shadow: var(--shadow);
+            transition: var(--transition);
+            border: 1px solid var(--border);
+        }
+        
+        .team-card:hover {
+            transform: translateY(-5px);
+            box-shadow: var(--shadow-hover);
+        }
+        
+        .team-image {
+            width: 100%;
+            height: 250px;
+            object-fit: cover;
+        }
+        
+        .team-info {
+            padding: 1.5rem;
+            text-align: center;
+        }
+        
+        .team-name {
+            font-weight: 600;
+            font-size: 1.1rem;
+            color: var(--text-dark);
+            margin-bottom: 0.25rem;
+        }
+        
+        .team-role {
+            color: var(--primary);
+            font-size: 0.9rem;
+            font-weight: 500;
+            margin-bottom: 0.75rem;
+        }
+        
+        .team-quote {
+            color: var(--text-light);
+            font-size: 0.9rem;
+            font-style: italic;
+            margin: 0;
+            border-top: 1px solid var(--border);
+            padding-top: 0.75rem;
+        }
+        
+        /* ================= FOOTER ================= */
+        .footer {
+            background: white;
+            border-top: 1px solid var(--border);
+            padding: 3rem 0 2rem;
+        }
+        
+        .footer-content {
+            max-width: 1200px;
+            margin: 0 auto;
+            padding: 0 1.5rem;
+            display: grid;
+            grid-template-columns: repeat(auto-fit, minmax(250px, 1fr));
+            gap: 2rem;
+        }
+        
+        .footer-section h5 {
+            font-weight: 600;
+            font-size: 1rem;
+            margin-bottom: 1rem;
+            color: var(--text-dark);
+        }
+        
+        .footer-section a {
+            display: block;
+            color: var(--text-light);
+            text-decoration: none;
+            font-size: 0.9rem;
+            margin-bottom: 0.5rem;
+            transition: var(--transition);
+        }
+        
+        .footer-section a:hover {
+            color: var(--primary);
+        }
+        
+        .copyright {
+            text-align: center;
+            padding-top: 2rem;
+            margin-top: 2rem;
+            border-top: 1px solid var(--border);
+            color: var(--text-light);
+            font-size: 0.85rem;
+        }
+        
+        /* ================= RESPONSIVE ================= */
+        @media (max-width: 992px) {
+            .hero-title {
+                font-size: 2.8rem;
+            }
+            
+            .section-title {
+                font-size: 2rem;
+            }
+            
+            .section {
+                padding: 3rem 0;
+            }
+        }
+        
+        @media (max-width: 768px) {
+            .hero-title {
+                font-size: 2.3rem;
+            }
+            
+            .hero-subtitle {
+                font-size: 1.1rem;
+            }
+            
+            .section-title {
+                font-size: 1.8rem;
+            }
+            
+            .image-gallery {
+                grid-template-columns: 1fr;
+            }
+            
+            .values-grid,
+            .team-grid {
+                grid-template-columns: 1fr;
+            }
+            
+            .stats-grid {
+                grid-template-columns: repeat(2, 1fr);
+            }
+        }
+        
+        @media (max-width: 576px) {
+            .hero-title {
+                font-size: 1.8rem;
+            }
+            
+            .hero-section {
+                padding: 3rem 0 2rem;
+            }
+            
+            .mission-highlight {
+                padding: 1.5rem;
+            }
+            
+            .stats-grid {
+                grid-template-columns: 1fr;
+            }
+            
+            .footer-content {
+                grid-template-columns: 1fr;
+                text-align: center;
+            }
+        }
+        
+        /* ================= ANIMATIONS ================= */
+        @keyframes fadeInUp {
+            from {
+                opacity: 0;
+                transform: translateY(30px);
+            }
+            to {
+                opacity: 1;
+                transform: translateY(0);
+            }
+        }
+        
+        .animate-fade-in {
+            animation: fadeInUp 0.8s ease-out forwards;
+        }
+        
+        .scroll-reveal {
+            opacity: 0;
+            transform: translateY(40px);
+            transition: opacity 0.8s ease, transform 0.8s ease;
+        }
+        
+        .scroll-reveal.visible {
+            opacity: 1;
+            transform: translateY(0);
+        }
+    </style>
+</head>
+
+<body>
+    <!-- NAVBAR -->
+    <nav class="navbar navbar-expand-lg">
+        <div class="container-fluid">
+            <a class="navbar-brand" href="{{ url_for('home') }}">
+                <img src="{{ url_for('static', filename='images/logo-black.png') }}" alt="Logo">
+            </a>
+
+            <button class="navbar-toggler" type="button" data-bs-toggle="collapse" data-bs-target="#navMenu">
+                <span class="navbar-toggler-icon"></span>
+            </button>
+
+            <div class="collapse navbar-collapse" id="navMenu">
+                <ul class="navbar-nav ms-auto align-items-center gap-1">
+                    <li class="nav-item">
+                        <a class="nav-link position-relative" href="{{ url_for('cart') }}">
+                            <i class="bi bi-bag"></i> Cart
+                            {% if cart_count and cart_count > 0 %}
+                            <span class="cart-badge">{{ cart_count }}</span>
+                            {% endif %}
+                        </a>
+                    </li>
+                    <li class="nav-item">
+                        <a class="nav-link" href="{{ url_for('profile') }}">
+                            <i class="bi bi-person me-1"></i>Profile
+                        </a>
+                    </li>
+                    <li class="nav-item">
+                        <a class="nav-link active" href="{{ url_for('about') }}">
+                            <i class="bi bi-info-circle me-1"></i>About
+                        </a>
+                    </li>
+                </ul>
+            </div>
+        </div>
+    </nav>
+    
+    <!-- HERO SECTION -->
+    <section class="hero-section animate-fade-in">
+        <div class="container">
+            <h1 class="hero-title">About Our Store</h1>
+            <p class="hero-subtitle">
+                We're more than just a store. We're a community dedicated to bringing you quality products, 
+                exceptional service, and an unforgettable shopping experience.
+            </p>
+        </div>
+    </section>
+    
+    <!-- OUR STORY SECTION -->
+    <section class="section">
+        <div class="container">
+            <div class="section-header scroll-reveal">
+                <h2 class="section-title">Our Story</h2>
+                <p class="section-subtitle">
+                    From humble beginnings to becoming your trusted shopping destination
+                </p>
+            </div>
+            
+            <div class="content-block scroll-reveal">
+                <p class="content-text">
+                    Founded in 2024, our store began with a simple idea: create an online shopping experience 
+                    that feels personal, intuitive, and trustworthy. In a digital world filled with noise, 
+                    we chose to focus on what truly matters—quality products, transparent processes, and 
+                    genuine customer relationships.
+                </p>
+                
+                <p class="content-text">
+                    What started as a small online boutique has grown into a comprehensive marketplace 
+                    offering carefully curated products across multiple categories. Our journey has been 
+                    guided by customer feedback, constantly evolving to meet your needs and exceed your 
+                    expectations.
+                </p>
+                
+                <div class="mission-highlight scroll-reveal">
+                    <p class="mission-text">
+                        "Our mission is simple: to make online shopping enjoyable, reliable, and accessible 
+                        to everyone, while maintaining the highest standards of quality and service."
+                    </p>
+                </div>
+            </div>
+            
+          
+    
+    <!-- OUR VALUES SECTION -->
+    <section class="section section-alt">
+        <div class="container">
+            <div class="section-header scroll-reveal">
+                <h2 class="section-title">Our Values</h2>
+                <p class="section-subtitle">
+                    The principles that guide everything we do
+                </p>
+            </div>
+            
+            <div class="values-grid">
+                <div class="value-card scroll-reveal">
+                    <div class="value-icon">
+                        <i class="bi bi-award"></i>
+                    </div>
+                    <h3 class="value-title">Quality First</h3>
+                    <p class="value-description">
+                        Every product in our collection is carefully selected and tested to ensure it meets 
+                        our high standards for quality, durability, and value.
+                    </p>
+                </div>
+                
+                <div class="value-card scroll-reveal">
+                    <div class="value-icon">
+                        <i class="bi bi-shield-check"></i>
+                    </div>
+                    <h3 class="value-title">Trust & Transparency</h3>
+                    <p class="value-description">
+                        We believe in honest pricing, clear policies, and building relationships based on 
+                        trust and mutual respect with our customers.
+                    </p>
+                </div>
+                
+                <div class="value-card scroll-reveal">
+                    <div class="value-icon">
+                        <i class="bi bi-heart"></i>
+                    </div>
+                    <h3 class="value-title">Customer Focus</h3>
+                    <p class="value-description">
+                        Your satisfaction is our priority. We listen, adapt, and continuously improve to 
+                        exceed your expectations at every touchpoint.
+                    </p>
+                </div>
+                
+                <div class="value-card scroll-reveal">
+                    <div class="value-icon">
+                        <i class="bi bi-lightning-charge"></i>
+                    </div>
+                    <h3 class="value-title">Innovation</h3>
+                    <p class="value-description">
+                        We embrace new technologies and ideas to create a seamless, modern shopping 
+                        experience that makes your life easier.
+                    </p>
+                </div>
+            </div>
+        </div>
+    </section>
+    
+    
+    <!-- TEAM SECTION -->
+    <section class="section">
+        <div class="container">
+            <div class="section-header scroll-reveal">
+                <h2 class="section-title">Meet Our Team</h2>
+                <p class="section-subtitle">
+                    The passionate individuals behind your exceptional shopping experience
+                </p>
+            </div>
+            
+            <div class="team-grid">
+                <div class="team-card scroll-reveal">
+                    <div class="team-info">
+                        <h4 class="team-name">Mark Lee Tadeja</h4>
+                        <p class="team-role">Founder & CEO</p>
+                        <p class="team-quote">"Building experiences, not just stores."</p>
+                    </div>
+                </div>
+                
+                <div class="team-card scroll-reveal">
+                    
+                    <div class="team-info">
+                        <h4 class="team-name">Marie Del Rosario</h4>
+                        <p class="team-role">Product Curator</p>
+                        <p class="team-quote">"Focused on what works best for our customers."</p>
+                    </div>
+                </div>
+                
+                <div class="team-card scroll-reveal">
+                    <div class="team-info">
+                        <h4 class="team-name">Lilibeth Bagcal</h4>
+                        <p class="team-role">Customer Experience</p>
+                        <p class="team-quote">"Your satisfaction is our success metric."</p>
+                    </div>
+                </div>
+            </div>
+        </div>
+    </section>
+    
+    <!-- FOOTER -->
+    <footer class="footer">
+        <div class="footer-content">
+            <div class="footer-section">
+                <h5>Cartiele</h5>
+                <p style="color: var(--text-light); font-size: 0.9rem;">
+                    Quality products, great prices, and exceptional service—all in one place.
+                </p>
+            </div>
+            <div class="footer-section">
+                <h5>Quick Links</h5>
+                <a href="{{ url_for('catalog') }}">Shop</a>
+                <a href="{{ url_for('cart') }}">Cart</a>
+                <a href="{{ url_for('profile') }}">Account</a>
+                <a href="{{ url_for('about') }}">About</a>
+            </div>
+            
+        </div>
+        
+        <div class="copyright">
+            <p>
+                © {{ current_year if current_year else "2026" }} Cartiele. All rights reserved.<br>
+                <span style="color: var(--text-light); font-size: 0.8rem;">
+                    Crafted with purpose and passion
+                </span>
+            </p>
+        </div>
+    </footer>
+    
+    <script src="{{ url_for('static', filename='js/bootstrap.bundle.min.js') }}"></script>
+    <script>
+        // Scroll reveal animation
+        const scrollReveals = document.querySelectorAll('.scroll-reveal');
+        
+        const revealOnScroll = () => {
+            scrollReveals.forEach(element => {
+                const elementTop = element.getBoundingClientRect().top;
+                const elementVisible = 150;
+                
+                if (elementTop < window.innerHeight - elementVisible) {
+                    element.classList.add('visible');
+                }
+            });
+        };
+        
+        // Initial check
+        revealOnScroll();
+        
+        // Check on scroll
+        window.addEventListener('scroll', revealOnScroll);
+        
+        // Smooth scrolling for anchor links
+        document.querySelectorAll('a[href^="#"]').forEach(anchor => {
+            anchor.addEventListener('click', function(e) {
+                e.preventDefault();
+                const targetId = this.getAttribute('href');
+                if(targetId === '#') return;
+                
+                const targetElement = document.querySelector(targetId);
+                if(targetElement) {
+                    window.scrollTo({
+                        top: targetElement.offsetTop - 80,
+                        behavior: 'smooth'
+                    });
+                }
+            });
+        });
+        
+        // Parallax effect for hero section
+        window.addEventListener('scroll', () => {
+            const scrolled = window.pageYOffset;
+            const hero = document.querySelector('.hero-section');
+            
+            if(hero) {
+                hero.style.backgroundPosition = `center ${scrolled * 0.5}px`;
+            }
+        });
+        
+        // Update current year in footer
+        document.addEventListener('DOMContentLoaded', function() {
+            const yearElements = document.querySelectorAll('[data-year]');
+            const currentYear = new Date().getFullYear();
+            
+            yearElements.forEach(element => {
+                if (element.textContent.includes('{{ current_year }}')) {
+                    element.textContent = element.textContent.replace('{{ current_year }}', currentYear);
+                }
+            });
+        });
+    </script>
+</body>
+</html>

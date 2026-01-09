@@ -1,0 +1,757 @@
+<!DOCTYPE html>
+<html lang="en">
+<head>
+    <title>Checkout - Cartiele</title>
+    <meta charset="UTF-8">
+    <meta name="viewport" content="width=device-width, initial-scale=1.0">
+
+    <link rel="stylesheet" href="{{ url_for('static', filename='css/bootstrap.min.css') }}">
+    <script src="{{ url_for('static', filename='js/sweetalert2/dist/sweetalert2.all.min.js') }}"></script>
+    <script src="{{ url_for('static', filename='js/bootstrap.bundle.min.js') }}"></script>
+
+
+    <style>
+        :root {
+            --primary: #4f46e5;
+            --primary-dark: #4338ca;
+            --primary-light: #e0e7ff;
+            --success: #10b981;
+            --warning: #f59e0b;
+            --danger: #ef4444;
+            --light: #f8fafc;
+            --dark: #1e293b;
+            --gray: #64748b;
+            --border: #e2e8f0;
+            --shadow: 0 4px 12px rgba(0, 0, 0, 0.05);
+            --shadow-hover: 0 8px 24px rgba(0, 0, 0, 0.1);
+            --radius: 10px;
+            --transition: all 0.3s ease;
+        }
+
+        body {
+            background: #f9fafb;
+            font-family: -apple-system, BlinkMacSystemFont, 'Segoe UI', Roboto, sans-serif;
+            color: var(--dark);
+            min-height: 100vh;
+        }
+
+        .checkout-container {
+            max-width: 800px;
+            margin: 0 auto;
+            padding: 20px;
+        }
+
+        /* Back Button */
+        .back-button {
+            position: absolute;
+            top: 20px;
+            left: 20px;
+            background: white;
+            border: 1px solid var(--border);
+            border-radius: 8px;
+            padding: 8px 16px;
+            font-size: 0.9rem;
+            font-weight: 500;
+            color: var(--primary);
+            text-decoration: none;
+            display: inline-flex;
+            align-items: center;
+            gap: 6px;
+            box-shadow: var(--shadow);
+            transition: var(--transition);
+        }
+
+        .back-button:hover {
+            background: var(--primary-light);
+            transform: translateX(-2px);
+            text-decoration: none;
+        }
+
+        /* Header */
+        .header-section {
+            text-align: center;
+            margin-bottom: 1.5rem;
+            padding-top: 60px;
+        }
+
+        .header-title {
+            color: var(--primary);
+            font-weight: 700;
+            font-size: 1.75rem;
+            margin-bottom: 0.5rem;
+        }
+
+        .header-subtitle {
+            color: var(--gray);
+            font-size: 0.95rem;
+        }
+
+        /* Step Indicator */
+        .step-indicator {
+            display: flex;
+            justify-content: center;
+            align-items: center;
+            gap: 2rem;
+            margin: 2rem 0;
+            position: relative;
+        }
+
+        .step {
+            display: flex;
+            flex-direction: column;
+            align-items: center;
+            position: relative;
+            z-index: 2;
+        }
+
+        .step-number {
+            width: 36px;
+            height: 36px;
+            background: var(--light);
+            border: 2px solid var(--border);
+            border-radius: 50%;
+            display: flex;
+            align-items: center;
+            justify-content: center;
+            font-weight: 600;
+            color: var(--gray);
+            margin-bottom: 0.5rem;
+            font-size: 0.9rem;
+            transition: var(--transition);
+        }
+
+        .step.active .step-number {
+            background: var(--primary);
+            border-color: var(--primary);
+            color: white;
+        }
+
+        .step.completed .step-number {
+            background: var(--success);
+            border-color: var(--success);
+            color: white;
+        }
+
+        .step-label {
+            font-size: 0.85rem;
+            color: var(--gray);
+            font-weight: 500;
+        }
+
+        .step.active .step-label {
+            color: var(--primary);
+            font-weight: 600;
+        }
+
+        .step-line {
+            position: absolute;
+            top: 18px;
+            left: 20%;
+            right: 20%;
+            height: 2px;
+            background: var(--border);
+            z-index: 1;
+        }
+
+        /* Cards */
+        .card-section {
+            background: white;
+            border-radius: var(--radius);
+            box-shadow: var(--shadow);
+            border: 1px solid var(--border);
+            margin-bottom: 1.25rem;
+            overflow: hidden;
+            transition: var(--transition);
+        }
+
+        .card-section:hover {
+            box-shadow: var(--shadow-hover);
+        }
+
+        .card-header {
+            background: var(--primary-light);
+            padding: 1rem 1.25rem;
+            border-bottom: 1px solid var(--border);
+        }
+
+        .card-header h4 {
+            margin: 0;
+            color: var(--primary);
+            font-weight: 600;
+            font-size: 1.1rem;
+            display: flex;
+            align-items: center;
+            gap: 0.5rem;
+        }
+
+        .card-header h4 i {
+            font-size: 1.1rem;
+        }
+
+        .card-body {
+            padding: 1.25rem;
+        }
+
+        /* Form Elements */
+        .form-label {
+            font-weight: 600;
+            color: var(--dark);
+            margin-bottom: 0.5rem;
+            font-size: 0.9rem;
+        }
+
+        .form-control, .form-select {
+            border: 1px solid var(--border);
+            border-radius: 8px;
+            padding: 0.75rem;
+            font-size: 0.9rem;
+            transition: var(--transition);
+        }
+
+        .form-control:focus, .form-select:focus {
+            border-color: var(--primary);
+            box-shadow: 0 0 0 3px rgba(79, 70, 229, 0.1);
+        }
+
+        textarea.form-control {
+            min-height: 100px;
+            resize: vertical;
+            font-size: 0.9rem;
+        }
+
+        /* Item Cards */
+        .item-card {
+            border: 1px solid var(--border);
+            border-radius: 8px;
+            padding: 1rem;
+            margin-bottom: 0.75rem;
+            background: var(--light);
+            transition: var(--transition);
+        }
+
+        .item-card:hover {
+            border-color: var(--primary-light);
+        }
+
+        .item-name {
+            font-weight: 600;
+            color: var(--dark);
+            margin-bottom: 0.25rem;
+            font-size: 0.95rem;
+        }
+
+        .item-description {
+            font-size: 0.85rem;
+            color: var(--gray);
+            margin-bottom: 0.5rem;
+        }
+
+        .item-variations {
+            font-size: 0.8rem;
+            color: var(--primary);
+            background: var(--primary-light);
+            padding: 0.2rem 0.5rem;
+            border-radius: 4px;
+            display: inline-block;
+            margin-bottom: 0.5rem;
+        }
+
+        .item-price {
+            font-size: 0.95rem;
+            font-weight: 600;
+            color: var(--primary);
+        }
+
+        .item-quantity {
+            color: var(--gray);
+            font-size: 0.85rem;
+        }
+
+        .item-subtotal {
+            font-weight: 600;
+            color: var(--dark);
+            font-size: 0.95rem;
+        }
+
+        /* Total Section */
+        .total-section {
+            background: var(--primary);
+            color: white;
+            padding: 1.25rem;
+            border-radius: var(--radius);
+            margin-top: 1.5rem;
+        }
+
+        .total-label {
+            font-size: 1rem;
+            font-weight: 500;
+        }
+
+        .total-amount {
+            font-size: 1.75rem;
+            font-weight: 700;
+        }
+
+        /* Voucher Section */
+        .voucher-section {
+            background: #f0f9ff;
+            border: 1px solid #bae6fd;
+        }
+
+        .voucher-section .card-header {
+            background: #e0f2fe;
+            border-bottom: 1px solid #bae6fd;
+        }
+
+        .voucher-section .card-header h4 {
+            color: #0ea5e9;
+        }
+
+        .discount-badge {
+            background: var(--success);
+            color: white;
+            padding: 0.25rem 0.75rem;
+            border-radius: 20px;
+            font-size: 0.85rem;
+            font-weight: 500;
+            display: inline-flex;
+            align-items: center;
+            gap: 0.25rem;
+        }
+
+        /* Buttons */
+        .btn-apply {
+            background: var(--primary);
+            color: white;
+            border: none;
+            padding: 0.75rem 1.25rem;
+            border-radius: 8px;
+            font-weight: 600;
+            font-size: 0.9rem;
+            transition: var(--transition);
+        }
+
+        .btn-apply:hover {
+            background: var(--primary-dark);
+        }
+
+        .btn-confirm {
+            background: var(--success);
+            color: white;
+            border: none;
+            padding: 0.875rem;
+            border-radius: 8px;
+            font-size: 1rem;
+            font-weight: 600;
+            width: 100%;
+            margin-top: 1.5rem;
+            transition: var(--transition);
+            display: flex;
+            align-items: center;
+            justify-content: center;
+            gap: 0.5rem;
+        }
+
+        .btn-confirm:hover {
+            background: #059669;
+            transform: translateY(-1px);
+        }
+
+        /* Receipt Upload */
+        .receipt-upload {
+            animation: slideDown 0.3s ease;
+        }
+
+        @keyframes slideDown {
+            from {
+                opacity: 0;
+                transform: translateY(-10px);
+            }
+            to {
+                opacity: 1;
+                transform: translateY(0);
+            }
+        }
+
+        .form-hint {
+            font-size: 0.85rem;
+            color: var(--gray);
+            margin-top: 0.25rem;
+        }
+
+        .required-field::after {
+            content: " *";
+            color: var(--danger);
+        }
+
+        /* Input Groups */
+        .input-group .btn {
+            border-top-left-radius: 0;
+            border-bottom-left-radius: 0;
+        }
+
+        .input-group .form-control {
+            border-top-right-radius: 0;
+            border-bottom-right-radius: 0;
+        }
+
+        @media (max-width: 768px) {
+            .checkout-container {
+                padding: 15px;
+            }
+            
+            .back-button {
+                top: 15px;
+                left: 15px;
+                padding: 6px 12px;
+                font-size: 0.85rem;
+            }
+            
+            .header-section {
+                padding-top: 50px;
+            }
+            
+            .header-title {
+                font-size: 1.5rem;
+            }
+            
+            .step-indicator {
+                gap: 1rem;
+            }
+            
+            .step-label {
+                font-size: 0.75rem;
+            }
+            
+            .card-body {
+                padding: 1rem;
+            }
+            
+            .total-amount {
+                font-size: 1.5rem;
+            }
+        }
+    </style>
+</head>
+<body>
+    <!-- Back Button -->
+    <a href="{{ url_for('cart') }}" class="back-button">
+        <i class="bi bi-arrow-left"></i> Back to Cart
+    </a>
+
+    <div class="checkout-container">
+        <!-- Header -->
+        <div class="header-section">
+            <h1 class="header-title">Checkout</h1>
+            <p class="header-subtitle">Complete your purchase securely</p>
+        </div>
+
+        <!-- Step Indicator -->
+        <div class="step-indicator">
+            <div class="step-line"></div>
+            <div class="step active">
+                <div class="step-number">1</div>
+                <div class="step-label">Shipping</div>
+            </div>
+            <div class="step active">
+                <div class="step-number">2</div>
+                <div class="step-label">Payment</div>
+            </div>
+            <div class="step">
+                <div class="step-number">3</div>
+                <div class="step-label">Confirm</div>
+            </div>
+        </div>
+
+        <form method="POST" action="{{ url_for('confirm_order') }}" enctype="multipart/form-data" id="checkoutForm">
+            <!-- Hidden selected item ids -->
+            {% for cid in selected_ids %}
+            <input type="hidden" name="selected_ids" value="{{ cid }}">
+            {% endfor %}
+
+            <!-- Shipping Information -->
+            <div class="card-section">
+                <div class="card-header">
+                    <h4><i class="bi bi-truck"></i> Shipping Details</h4>
+                </div>
+                <div class="card-body">
+                    <div class="row g-3">
+                        <div class="col-md-6">
+                            <label class="form-label required-field">Full Name</label>
+                            <input type="text" name="name" class="form-control" required
+                                   value="{{ saved[0] if saved else '' }}"
+                                   placeholder="Your full name">
+                        </div>
+                        
+                        <div class="col-md-6">
+                            <label class="form-label required-field">Phone Number</label>
+                            <input type="text" name="phone" class="form-control" required
+                                   value="{{ saved[1] if saved else '' }}"
+                                   placeholder="Your phone">
+                        </div>
+                        
+                        <div class="col-12">
+                            <label class="form-label required-field">Delivery Address</label>
+                            <textarea name="address" class="form-control" required
+                                      placeholder="Complete delivery address">{{ saved[2] if saved else '' }}</textarea>
+                            <div class="form-hint">Include house number, street, city</div>
+                        </div>
+                    </div>
+                </div>
+            </div>
+
+            <!-- Payment Method -->
+            <div class="card-section">
+                <div class="card-header">
+                    <h4><i class="bi bi-credit-card"></i> Payment Method</h4>
+                </div>
+                <div class="card-body">
+                    <div class="mb-3">
+                        <label class="form-label required-field">Select Payment Method</label>
+                        <select name="payment_method" id="payment_method" class="form-select" required>
+                            <option value="">-- Choose Payment --</option>
+                            <option value="COD">💵 Cash on Delivery</option>
+                            <option value="Cashless">💳 Cashless Payment</option>
+                        </select>
+                    </div>
+
+                    <!-- Receipt Upload -->
+                    <div class="receipt-upload" id="receipt_upload" style="display: none;">
+                        <label class="form-label">Payment Screenshot</label>
+                        <input type="file" name="receipt" accept="image/*" class="form-control" id="receipt_file">
+                        <div class="form-hint">
+                            Upload payment screenshot (JPG, PNG)
+                        </div>
+                    </div>
+                </div>
+            </div>
+
+            <!-- Order Summary -->
+            <div class="card-section">
+                <div class="card-header">
+                    <h4><i class="bi bi-bag-check"></i> Order Summary</h4>
+                </div>
+                <div class="card-body">
+                    {% for item in items %}
+                    {% set subtotal = item.price * item.qty %}
+                    <div class="item-card">
+                        <div class="d-flex justify-content-between align-items-start mb-2">
+                            <div>
+                                <div class="item-name">{{ item.name }}</div>
+                                <div class="item-description">{{ item.description }}</div>
+                            </div>
+                            <div class="item-price">₱{{ '%.2f'|format(item.price) }}</div>
+                        </div>
+                        
+                        {% if item.variations %}
+                        <div class="item-variations">
+                            <i class="bi bi-tags"></i> {{ item.variations }}
+                        </div>
+                        {% endif %}
+                        
+                        <div class="d-flex justify-content-between align-items-center mt-2">
+                            <div class="item-quantity">Quantity: {{ item.qty }}</div>
+                            <div class="item-subtotal">₱{{ '%.2f'|format(subtotal) }}</div>
+                        </div>
+                    </div>
+                    {% endfor %}
+
+                    <!-- Voucher Code -->
+                    <div class="card-section voucher-section mt-3">
+                        <div class="card-header">
+                            <h4><i class="bi bi-gift"></i> Apply Voucher</h4>
+                        </div>
+                        <div class="card-body">
+                            <label class="form-label">Voucher Code</label>
+                            <div class="input-group mb-3">
+                                <input type="text" id="voucher_code" name="voucher" class="form-control" 
+                                       placeholder="Enter voucher code">
+                                <button type="button" class="btn btn-apply" id="apply_voucher_btn">
+                                    Apply
+                                </button>
+                            </div>
+                            <div class="form-hint">
+                                Code: <b>papasalahat</b> - 15% off (max ₱1000)
+                            </div>
+                            <div class="mt-2">
+                                <div id="discount_text" class="text-success fw-bold"></div>
+                            </div>
+                        </div>
+                    </div>
+
+                    <!-- Total -->
+                    <div class="total-section">
+                        <div class="d-flex justify-content-between align-items-center">
+                            <div>
+                                <div class="total-label">Total Amount</div>
+                            </div>
+                            <div class="text-end">
+                                <div class="total-amount">₱<span id="total_price">{{ '%.2f'|format(total) }}</span></div>
+                                <input type="hidden" name="final_total" id="final_total" value="{{ total }}">
+                            </div>
+                        </div>
+                    </div>
+                </div>
+            </div>
+
+            <!-- Confirm Button -->
+            <button type="submit" class="btn btn-confirm" id="confirmBtn">
+                <i class="bi bi-shield-check"></i> Confirm Order
+            </button>
+        </form>
+    </div>
+
+    <script>
+        // Voucher Application
+        const originalTotal = parseFloat({{ total }});
+        let appliedDiscount = 0;
+
+        document.getElementById("apply_voucher_btn").addEventListener("click", () => {
+            const code = document.getElementById("voucher_code").value.trim().toLowerCase();
+            const discountText = document.getElementById("discount_text");
+            const totalSpan = document.getElementById("total_price");
+            const finalTotalInput = document.getElementById("final_total");
+
+            if (code === "papasalahat") {
+                appliedDiscount = originalTotal * 0.15;
+                if (appliedDiscount > 1000) appliedDiscount = 1000;
+
+                discountText.innerHTML = `
+                    <span class="discount-badge">
+                        <i class="bi bi-check-circle"></i> Discount: -₱${appliedDiscount.toFixed(2)}
+                    </span>
+                `;
+                
+                const newTotal = originalTotal - appliedDiscount;
+                totalSpan.textContent = newTotal.toFixed(2);
+                finalTotalInput.value = newTotal.toFixed(2);
+                
+                // SweetAlert success
+                Swal.fire({
+                    icon: 'success',
+                    title: 'Voucher Applied!',
+                    text: `You saved ₱${appliedDiscount.toFixed(2)}`,
+                    toast: true,
+                    position: 'top-end',
+                    showConfirmButton: false,
+                    timer: 2000,
+                    timerProgressBar: true
+                });
+                
+            } else if (code === "") {
+                appliedDiscount = 0;
+                discountText.textContent = "";
+                totalSpan.textContent = originalTotal.toFixed(2);
+                finalTotalInput.value = originalTotal.toFixed(2);
+            } else {
+                appliedDiscount = 0;
+                discountText.innerHTML = `
+                    <span class="text-danger">
+                        <i class="bi bi-x-circle"></i> Invalid code
+                    </span>
+                `;
+                totalSpan.textContent = originalTotal.toFixed(2);
+                finalTotalInput.value = originalTotal.toFixed(2);
+                
+                // SweetAlert error
+                Swal.fire({
+                    icon: 'error',
+                    title: 'Invalid Voucher',
+                    text: 'Please enter a valid voucher code',
+                    toast: true,
+                    position: 'top-end',
+                    showConfirmButton: false,
+                    timer: 2000,
+                    timerProgressBar: true
+                });
+            }
+        });
+
+        // Payment Method Toggle
+        document.getElementById("payment_method").addEventListener("change", function() {
+            const receiptDiv = document.getElementById("receipt_upload");
+            if (this.value === "Cashless") {
+                receiptDiv.style.display = "block";
+                receiptDiv.style.animation = "slideDown 0.3s ease";
+            } else {
+                receiptDiv.style.display = "none";
+            }
+        });
+
+document.getElementById('checkoutForm').addEventListener('submit', function(e) {
+    e.preventDefault();
+
+    const form = this; 
+
+    const paymentMethod = document.getElementById('payment_method').value;
+    const receiptInput = document.getElementById('receipt_file');
+
+    if (paymentMethod === "Cashless" && (!receiptInput || !receiptInput.files.length)) {
+        Swal.fire({
+            icon: 'warning',
+            title: 'Payment Screenshot Required',
+            text: 'Please upload your payment screenshot for cashless payment.',
+            confirmButtonColor: '#4f46e5'
+        });
+        return;
+    }
+
+    const nameField = document.querySelector('input[name="name"]');
+    const phoneField = document.querySelector('input[name="phone"]');
+    const addressField = document.querySelector('textarea[name="address"]');
+
+    if (!nameField.value.trim() || !phoneField.value.trim() || !addressField.value.trim()) {
+        Swal.fire({
+            icon: 'warning',
+            title: 'Missing Information',
+            text: 'Please fill in all required fields.',
+            confirmButtonColor: '#4f46e5'
+        });
+        return;
+    }
+
+    Swal.fire({
+        title: 'Confirm Order?',
+        text: 'Please review your order before confirming.',
+        icon: 'question',
+        showCancelButton: true,
+        confirmButtonText: 'Yes, Confirm Order',
+        cancelButtonText: 'Review',
+        confirmButtonColor: '#10b981',
+        cancelButtonColor: '#64748b'
+    }).then((result) => {
+        if (result.isConfirmed) {
+
+            Swal.fire({
+                title: 'Placing Your Order...',
+                text: 'Please wait while we process your order.',
+                allowOutsideClick: false,
+                didOpen: () => Swal.showLoading()
+            });
+
+            setTimeout(() => {
+                Swal.fire({
+                    icon: 'success',
+                    title: 'Order Placed Successfully',
+                    text: 'Thank you for your purchase. You can track your order in My Orders.',
+                    showConfirmButton: false,
+                    timer: 2200
+                });
+
+                setTimeout(() => {
+                    form.submit(); 
+                }, 2200);
+
+            }, 1200);
+        }
+    });
+});
+
+
+        // Auto-focus voucher input on click
+        document.getElementById('voucher_code').addEventListener('click', function() {
+            this.select();
+        });
+    </script>
+</body>
+</html>

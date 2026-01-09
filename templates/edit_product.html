@@ -1,0 +1,386 @@
+<!DOCTYPE html>
+<html lang="en">
+<head>
+    <meta charset="UTF-8">
+    <title>Edit Product</title>
+
+    <!-- OFFLINE BOOTSTRAP -->
+    <link rel="stylesheet" href="{{ url_for('static', filename='css/bootstrap.min.css') }}">
+    <script src="{{ url_for('static', filename='js/bootstrap.bundle.min.js') }}"></script>
+
+    <!-- SWEETALERT -->
+    <script src="{{ url_for('static', filename='js/sweetalert2/dist/sweetalert2.all.min.js') }}"></script>
+
+    <style>
+        body {
+            background: #f1f3f6;
+            font-size: 14px;
+        }
+
+        /* SIDEBAR */
+        .sidebar {
+            position: fixed;
+            left: 0;
+            top: 0;
+            width: 230px;
+            height: 100vh;
+            background: #111827;
+            padding: 20px 15px;
+            color: #fff;
+        }
+
+        .sidebar h5 {
+            text-align: center;
+            font-weight: 600;
+            margin-bottom: 30px;
+        }
+
+        .sidebar a {
+            display: flex;
+            align-items: center;
+            gap: 10px;
+            padding: 10px 14px;
+            border-radius: 10px;
+            margin-bottom: 6px;
+            color: #c7cbd6;
+            text-decoration: none;
+            font-size: 13.5px;
+        }
+
+        .sidebar a:hover,
+        .sidebar a.active {
+            background: #1f2937;
+            color: #fff;
+        }
+
+        /* MAIN */
+        .content {
+            margin-left: 230px;
+            padding: 30px;
+        }
+
+        .card {
+            border-radius: 14px;
+            box-shadow: 0 8px 20px rgba(0,0,0,0.08);
+        }
+
+        .section-title {
+            font-weight: 600;
+            margin-bottom: 15px;
+        }
+
+        .image-box img {
+            width: 120px;
+            height: 120px;
+            object-fit: cover;
+        }
+
+        
+    </style>
+</head>
+
+<body>
+
+<!-- SIDEBAR -->
+<div class="sidebar">
+    <h5>Admin Panel</h5>
+    <a href="/admin/dashboard#products" class="active"> Products</a>
+    <a href="/admin/dashboard#users">Users</a>
+    <a href="/admin/dashboard#passwords">Password Requests</a>
+    <a href="/admin/dashboard#orders"> Orders</a>
+    <a href="/admin/dashboard#sales"> Sales</a>
+    <a href="/admin/dashboard#completed"> Orders History</a>
+    <hr class="text-secondary">
+    <a href="/catalog"> Catalog</a>
+    <a href="#" class="text-danger" onclick="confirmLogout(event)"> Logout</a>
+</div>
+
+<!-- MAIN CONTENT -->
+<div class="content">
+
+    <div class="card p-4">
+        <h4 class="mb-4"> Edit Product</h4>
+
+        <form method="POST" enctype="multipart/form-data">
+
+            <!-- PRODUCT INFO -->
+            <div class="row g-3 mb-4">
+                <div class="col-md-6">
+                    <label class="form-label">Product Name</label>
+                    <input class="form-control" name="name" value="{{ product[1] }}" required>
+                </div>
+
+                <div class="col-md-3">
+                    <label class="form-label">Price (₱)</label>
+                    <input class="form-control" name="price" value="{{ product[2] }}" required>
+                </div>
+
+                <div class="mb-3">
+    <label class="form-label">Category</label>
+    <select name="category" class="form-select category-black" required>
+        <option value="">-- Select Category --</option>
+        <option value="Clothing" {{ 'selected' if product[5]=='Clothing' else '' }}>Clothing</option>
+        <option value="Electronics" {{ 'selected' if product[5]=='Electronics' else '' }}>Electronics</option>
+        <option value="Personal Care & Beauty" {{ 'selected' if product[5]=='Personal Care & Beauty' else '' }}>Personal Care & Beauty</option>
+        <option value="Groceries" {{ 'selected' if product[5]=='Groceries' else '' }}>Groceries</option>
+        <option value="Appliances" {{ 'selected' if product[5]=='Appliances' else '' }}>Appliances</option>
+        <option value="Toys/Sports" {{ 'selected' if product[5]=='Toys/Sports' else '' }}>Toys / Sports</option>
+        <option value="Shoes & Footwear" {{ 'selected' if product[5]=='Shoes & Footwear' else '' }}>Shoes & Footwear</option>
+        <option value="Home Collections" {{ 'selected' if product[5]=='Home Collections' else '' }}>Home Collections</option>
+        <option value="Automotive" {{ 'selected' if product[5]=='Automotive' else '' }}>Automotive</option>
+        <option value="Books" {{ 'selected' if product[5]=='Books' else '' }}>Books</option>
+    </select>
+</div>
+
+                <div class="col-12">
+                    <label class="form-label">Description</label>
+                    <textarea class="form-control" rows="4" name="description">{{ product[3] }}</textarea>
+                </div>
+            </div>
+
+            <!-- IMAGES -->
+            <h6 class="section-title"> Existing Images</h6>
+            <div class="d-flex gap-3 flex-wrap mb-4">
+                {% for img in images %}
+                <div class="image-box text-center">
+                    <img src="/static/{{ img[1] }}" class="img-thumbnail mb-1">
+                    <button type="button" class="btn btn-sm btn-danger w-100"
+                        onclick="deleteImage({{ img[0] }})">
+                        Delete
+                    </button>
+                </div>
+                {% endfor %}
+            </div>
+
+            <label class="form-label"> Add New Images</label>
+             <input type="file" id="newImagesInput" name="new_images[]" multiple class="form-control mb-2">
+            <div id="newImagesPreview" class="d-flex gap-3 flex-wrap mb-4"></div>
+
+            <!-- VARIATIONS -->
+            <h6 class="section-title"> Variations & Options</h6>
+
+            <div id="existing-variations">
+                {% for v in variations %}
+                <div class="border rounded p-3 mb-2" data-option-id="{{ v[1] }}">
+                    <strong>{{ v[0] }} - {{ v[2] }}</strong>
+
+                    <input type="hidden" name="option_id[]" value="{{ v[1] }}">
+
+                    <input type="number" name="option_stock[]" value="{{ v[3] }}"
+                        class="form-control mt-2" placeholder="Stock">
+
+                    <input type="number" step="0.01" name="option_extra_price[]"
+                        value="{{ v[4] }}" class="form-control mt-2" placeholder="Extra Price">
+
+                    <button type="button" class="btn btn-sm btn-outline-danger mt-2"
+                        onclick="removeExistingOption(this)">
+                        Remove Option
+                    </button>
+                </div>
+                {% endfor %}
+            </div>
+
+            <!-- ADD NEW VARIATION -->
+            <h6 class="section-title mt-4">Add New Variation</h6>
+            <div id="new-variations"></div>
+
+            <button type="button" class="btn btn-outline-success mb-4"
+                onclick="addVariation()">+ Add Variation</button>
+
+            <!-- SAVE -->
+            <div class="text-end">
+                <button class="btn btn-primary px-4"> Save Changes</button>
+                <a href="/admin/dashboard#products" class="btn btn-secondary ms-2">Cancel</a>
+            </div>
+
+        </form>
+    </div>
+</div>
+
+<!-- LOGOUT -->
+<script>
+const newImagesInput = document.getElementById('newImagesInput');
+const newImagesPreview = document.getElementById('newImagesPreview');
+
+newImagesInput.addEventListener('change', function() {
+    newImagesPreview.innerHTML = ''; // Clear previous previews
+
+    const files = Array.from(this.files);
+    files.forEach(file => {
+        const reader = new FileReader();
+        reader.onload = function(e) {
+            const div = document.createElement('div');
+            div.classList.add('image-box', 'text-center');
+            div.innerHTML = `
+                <img src="${e.target.result}" class="img-thumbnail mb-1">
+            `;
+            newImagesPreview.appendChild(div);
+        };
+        reader.readAsDataURL(file);
+    });
+});
+function confirmLogout(e) {
+    e.preventDefault();
+    Swal.fire({
+        title: "Logout?",
+        text: "Are you sure you want to logout?",
+        icon: "warning",
+        showCancelButton: true,
+        confirmButtonColor: "#dc3545"
+    }).then(res => {
+        if (res.isConfirmed) window.location.href = "/admin/logout";
+    });
+}
+    function removeExistingOption(btn) {
+    Swal.fire({
+        title: 'Remove this option?',
+        text: "This will delete the option permanently.",
+        icon: 'warning',
+        showCancelButton: true,
+        confirmButtonColor: '#dc3545',
+        cancelButtonColor: '#3085d6',
+        confirmButtonText: 'Yes, remove it!',
+        cancelButtonText: 'Cancel'
+    }).then((result) => {
+        if (result.isConfirmed) {
+            const div = btn.closest("[data-option-id]");
+            const optionId = div.getAttribute("data-option-id");
+
+            // AJAX request to delete option
+            fetch(`/admin/delete_product_option/${optionId}`, {
+                method: "POST"
+            })
+            .then(res => res.json())
+            .then(data => {
+                if (data.success) {
+                    div.remove(); // Remove from DOM immediately
+                    Swal.fire(
+                        'Removed!',
+                        'Option deleted successfully.',
+                        'success'
+                    );
+                } else {
+                    Swal.fire(
+                        'Error!',
+                        data.message || 'Failed to delete option.',
+                        'error'
+                    );
+                }
+            })
+            .catch(err => {
+                Swal.fire(
+                    'Error!',
+                    'An error occurred.',
+                    'error'
+                );
+            });
+        }
+    });
+}
+
+    // ------------------ Images ------------------
+    function deleteImage(imageId) {
+        Swal.fire({
+            title: "Delete image?",
+            icon: "warning",
+            showCancelButton: true,
+            confirmButtonColor: "#dc3545"
+        }).then(res => {
+            if (res.isConfirmed) {
+                fetch(`/admin/delete_product_image/${imageId}`, {
+                    method: "POST"
+                }).then(() => location.reload());
+            }
+        });
+    }
+
+    // ------------------ Variations & Options ------------------
+    let variationCount = 0;
+    function removeExistingOption(btn) {
+        const div = btn.closest("[data-option-id]");
+        const optionId = div.getAttribute("data-option-id");
+        const input = document.createElement("input");
+        input.type = "hidden";
+        input.name = "delete_option_id[]";
+        input.value = optionId;
+        div.appendChild(input);
+        div.style.display = "none";
+    }
+
+    function addVariation() {
+        variationCount++;
+        const div = document.createElement("div");
+        div.classList.add("border", "p-2", "mb-2");
+        div.innerHTML = `
+            <input type="text" name="new_variation_name[]" class="form-control mb-1" placeholder="Variation Name (e.g., Color)">
+            <div id="options-${variationCount}">
+                <input type="text" name="new_option_value[${variationCount}][]" class="form-control mb-1" placeholder="Option Value (e.g., Red)">
+                <input type="number" step="0.01" name="new_option_extra_price[${variationCount}][]" class="form-control mb-1" placeholder="Extra Price">
+                <input type="number" name="new_option_stock[${variationCount}][]" class="form-control mb-1" placeholder="Stock">
+            </div>
+            <button type="button" class="btn btn-sm btn-secondary mb-2" onclick="addOption(${variationCount})">Add Option</button>
+        `;
+        document.getElementById("new-variations").appendChild(div);
+    }
+
+    function addOption(varId) {
+        const div = document.createElement("div");
+        div.classList.add("mb-1");
+        div.innerHTML = `
+            <input type="text" name="new_option_value[${varId}][]" class="form-control mb-1" placeholder="Option Value">
+            <input type="number" step="0.01" name="new_option_extra_price[${varId}][]" class="form-control mb-1" placeholder="Extra Price">
+            <input type="number" name="new_option_stock[${varId}][]" class="form-control mb-1" placeholder="Stock">
+        `;
+        document.getElementById(`options-${varId}`).appendChild(div);
+    }
+function removeExistingOption(btn) {
+    Swal.fire({
+        title: 'Remove this option?',
+        text: "This will mark the option for deletion.",
+        icon: 'warning',
+        showCancelButton: true,
+        confirmButtonColor: '#dc3545',
+        cancelButtonColor: '#3085d6',
+        confirmButtonText: 'Yes, remove it!',
+        cancelButtonText: 'Cancel'
+    }).then((result) => {
+        if (result.isConfirmed) {
+            const div = btn.closest("[data-option-id]");
+            const optionId = div.getAttribute("data-option-id");
+            const input = document.createElement("input");
+            input.type = "hidden";
+            input.name = "delete_option_id[]";
+            input.value = optionId;
+            div.appendChild(input);
+            div.style.display = "none";
+
+            Swal.fire(
+                'Removed!',
+                'This option will be deleted when you save.',
+                'success'
+            );
+        }
+    });
+}
+document.querySelector("form").addEventListener("submit", function(e) {
+    e.preventDefault(); 
+    Swal.fire({
+        title: 'Save changes?',
+        text: "All updates including variations, options, and images will be saved.",
+        icon: 'question',
+        showCancelButton: true,
+        confirmButtonColor: '#28a745',
+        cancelButtonColor: '#dc3545',
+        confirmButtonText: 'Yes, save!',
+        cancelButtonText: 'Cancel'
+    }).then((result) => {
+        if (result.isConfirmed) {
+            e.target.submit(); 
+        }
+    });
+});
+
+</script>
+
+</body>
+</html>

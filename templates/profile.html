@@ -1,0 +1,1184 @@
+<!DOCTYPE html>
+<html lang="en">
+<head>
+    <meta charset="UTF-8">
+    <meta name="viewport" content="width=device-width, initial-scale=1.0">
+    <title>My Profile</title>
+    
+ <link rel="stylesheet" href="{{ url_for('static', filename='css/bootstrap.min.css') }}">
+    <script src="{{ url_for('static', filename='js/sweetalert2/dist/sweetalert2.all.min.js') }}"></script>
+    <script src="{{ url_for('static', filename='js/bootstrap.bundle.min.js') }}"></script>
+
+    <style>
+        :root {
+            --primary: #4f46e5;
+            --primary-dark: #4338ca;
+            --secondary: #f8fafc;
+            --accent: #f97316;
+            --text-dark: #334155;
+            --text-light: #64748b;
+            --border: #e2e8f0;
+            --shadow: 0 4px 12px rgba(0, 0, 0, 0.05);
+            --shadow-hover: 0 8px 24px rgba(0, 0, 0, 0.1);
+            --radius: 10px;
+            --transition: all 0.25s ease;
+        }
+
+        body {
+            background: linear-gradient(135deg, #f8fafc 0%, #f1f5f9 100%);
+            font-family: -apple-system, BlinkMacSystemFont, 'Segoe UI', Roboto, sans-serif;
+            color: var(--text-dark);
+            line-height: 1.5;
+            min-height: 100vh;
+            padding: 0;
+            margin: 0;
+        }
+
+       
+/* ================= NAVBAR ================= */
+.navbar {
+    background: white;
+    padding: 0.75rem 1.5rem;
+    box-shadow: 0 2px 10px rgba(0,0,0,0.05);
+    border-bottom: 1px solid var(--border);
+}
+
+.navbar-brand {
+    font-weight: 700;
+    font-size: 1.25rem;
+    color: var(--primary);
+}
+
+.navbar-brand img {
+    height: 50px;
+    width: auto;
+}
+
+.nav-link {
+    font-weight: 500;
+    font-size: 0.95rem;
+    color: var(--text-dark);
+    padding: 0.5rem 0.75rem !important;
+}
+
+.nav-link:hover, .nav-link.active {
+    color: var(--primary);
+}
+
+.cart-badge {
+    position: absolute;
+    top: -5px;
+    right: -5px;
+    background: var(--accent);
+    color: white;
+    font-size: 0.7rem;
+    width: 16px;
+    height: 16px;
+    border-radius: 50%;
+    display: flex;
+    align-items: center;
+    justify-content: center;
+}
+
+
+        /* Container */
+        .profile-container {
+            max-width: 1200px;
+            margin: 2rem auto;
+            padding: 2rem;
+            background: white;
+            border-radius: var(--radius);
+            box-shadow: var(--shadow);
+            border: 1px solid var(--border);
+        }
+
+        /* Header */
+        .profile-header {
+            border-bottom: 2px solid var(--border);
+            padding-bottom: 1.5rem;
+            margin-bottom: 2rem;
+        }
+
+        .profile-title {
+            font-size: 1.75rem;
+            font-weight: 700;
+            color: var(--text-dark);
+            margin: 0;
+        }
+
+        /* Back Button */
+        .back-btn {
+            color: var(--text-light);
+            text-decoration: none;
+            font-weight: 500;
+            display: inline-flex;
+            align-items: center;
+            gap: 0.5rem;
+            margin-bottom: 1.5rem;
+            transition: var(--transition);
+        }
+
+        .back-btn:hover {
+            color: var(--primary);
+            transform: translateX(-4px);
+        }
+
+        /* Tabs */
+        .nav-tabs {
+            border-bottom: 1px solid var(--border);
+            margin-bottom: 2rem;
+        }
+
+        .nav-tabs .nav-link {
+            border: none;
+            color: var(--text-light);
+            font-weight: 500;
+            padding: 0.75rem 1.25rem;
+            border-radius: 8px 8px 0 0;
+            margin-bottom: -1px;
+            transition: var(--transition);
+        }
+
+        .nav-tabs .nav-link:hover {
+            color: var(--primary);
+            background: var(--secondary);
+        }
+
+        .nav-tabs .nav-link.active {
+            color: var(--primary);
+            background: white;
+            border: 1px solid var(--border);
+            border-bottom-color: white;
+        }
+
+        /* Accordion */
+        .accordion {
+            max-width: 800px;
+            margin: 0 auto;
+        }
+
+        .accordion-item {
+            border: 1px solid var(--border);
+            border-radius: var(--radius);
+            margin-bottom: 1rem;
+            overflow: hidden;
+            background: white;
+            transition: var(--transition);
+        }
+
+        .accordion-item:hover {
+            box-shadow: var(--shadow-hover);
+        }
+
+        .accordion-button {
+            font-weight: 600;
+            padding: 1rem 1.5rem;
+            background: white;
+            color: var(--text-dark);
+            border: none;
+        }
+
+        .accordion-button:not(.collapsed) {
+            color: var(--primary);
+            background: var(--secondary);
+            box-shadow: none;
+        }
+
+        .accordion-button:focus {
+            box-shadow: none;
+            border-color: var(--primary);
+        }
+
+        .accordion-body {
+            padding: 1.5rem;
+        }
+
+        /* Profile Image */
+        .profile-img-container {
+            display: flex;
+            flex-direction: column;
+            align-items: center;
+            margin-bottom: 1.5rem;
+        }
+
+        .profile-img {
+            width: 140px;
+            height: 140px;
+            border-radius: 50%;
+            object-fit: cover;
+            border: 4px solid white;
+            box-shadow: var(--shadow);
+            margin-bottom: 1rem;
+            transition: var(--transition);
+        }
+
+        .profile-img:hover {
+            transform: scale(1.05);
+        }
+
+        .file-input-label {
+            display: inline-block;
+            padding: 0.5rem 1rem;
+            background: var(--primary);
+            color: white;
+            border-radius: 6px;
+            cursor: pointer;
+            font-size: 0.9rem;
+            font-weight: 500;
+            transition: var(--transition);
+        }
+
+        .file-input-label:hover {
+            background: var(--primary-dark);
+            transform: translateY(-1px);
+        }
+
+        /* Forms */
+        .form-label {
+            font-weight: 500;
+            font-size: 0.9rem;
+            color: var(--text-dark);
+            margin-bottom: 0.5rem;
+        }
+
+        .form-control {
+            padding: 0.625rem 0.75rem;
+            border: 1px solid var(--border);
+            border-radius: 6px;
+            font-size: 0.95rem;
+            transition: var(--transition);
+        }
+
+        .form-control:focus {
+            border-color: var(--primary);
+            box-shadow: 0 0 0 3px rgba(79, 70, 229, 0.1);
+        }
+
+        /* Buttons */
+        .btn {
+            padding: 0.75rem 1.5rem;
+            font-weight: 500;
+            border-radius: 8px;
+            border: none;
+            transition: var(--transition);
+        }
+
+        .btn:hover {
+            transform: translateY(-2px);
+            box-shadow: var(--shadow-hover);
+        }
+
+        .btn-primary {
+            background: var(--primary);
+            color: white;
+        }
+
+        .btn-primary:hover {
+            background: var(--primary-dark);
+        }
+
+        .btn-warning {
+            background: var(--accent);
+            color: white;
+        }
+
+        .btn-warning:hover {
+            background: #ea580c;
+        }
+
+        /* Orders Section */
+        .status-pills {
+            overflow-x: auto;
+            white-space: nowrap;
+            padding-bottom: 0.5rem;
+            margin-bottom: 1.5rem;
+            -webkit-overflow-scrolling: touch;
+        }
+
+        .status-pills .nav-link {
+            display: inline-flex;
+            align-items: center;
+            gap: 0.5rem;
+            padding: 0.5rem 1rem;
+            border-radius: 20px;
+            background: var(--secondary);
+            border: 1px solid var(--border);
+            margin-right: 0.5rem;
+            font-size: 0.85rem;
+            transition: var(--transition);
+        }
+
+        .status-pills .nav-link:hover {
+            background: #e0e7ff;
+            border-color: var(--primary);
+        }
+
+        .status-pills .nav-link.active {
+            background: var(--primary);
+            color: white;
+            border-color: var(--primary);
+        }
+
+        .status-count {
+            background: var(--text-light);
+            color: white;
+            font-size: 0.7rem;
+            padding: 0.125rem 0.5rem;
+            border-radius: 10px;
+            font-weight: 600;
+        }
+
+        .status-pills .nav-link.active .status-count {
+            background: white;
+            color: var(--primary);
+        }
+
+        /* Order Cards */
+        .order-card {
+            background: white;
+            border-radius: var(--radius);
+            border: 1px solid var(--border);
+            padding: 1.5rem;
+            margin-bottom: 1.5rem;
+            box-shadow: var(--shadow);
+            transition: var(--transition);
+        }
+
+        .order-card:hover {
+            box-shadow: var(--shadow-hover);
+        }
+
+        .order-updated {
+            animation: pulse 1.5s ease-in-out 2;
+            border: 2px solid #10b981 !important;
+        }
+
+        @keyframes pulse {
+            0%   { box-shadow: 0 0 0 0 rgba(16, 185, 129, 0.6); }
+            70%  { box-shadow: 0 0 0 10px rgba(16, 185, 129, 0); }
+            100% { box-shadow: 0 0 0 0 rgba(16, 185, 129, 0); }
+        }
+
+        .updated-badge {
+            font-size: 0.75rem;
+            background: #10b981;
+            color: white;
+            padding: 0.125rem 0.5rem;
+            border-radius: 10px;
+            margin-left: 0.5rem;
+            font-weight: 500;
+        }
+
+        .order-header {
+            display: flex;
+            justify-content: space-between;
+            align-items: flex-start;
+            margin-bottom: 1rem;
+            padding-bottom: 1rem;
+            border-bottom: 1px solid var(--border);
+        }
+
+        .order-id {
+            font-weight: 600;
+            color: var(--text-dark);
+            font-size: 1.1rem;
+        }
+
+        .order-status {
+            font-size: 0.8rem;
+            font-weight: 600;
+            padding: 0.25rem 0.75rem;
+            border-radius: 20px;
+        }
+
+        .status-pending { background: #fef3c7; color: #92400e; }
+        .status-seller-to-pack { background: #dbeafe; color: #1e40af; }
+        .status-to-ship { background: #e0e7ff; color: #3730a3; }
+        .status-out-for-delivery { background: #f3e8ff; color: #5b21b6; }
+        .status-delivered { background: #dcfce7; color: #166534; }
+        .status-completed { background: #f1f5f9; color: #475569; }
+        .status-cancelled, .status-declined { background: #fee2e2; color: #991b1b; }
+
+        .view-details {
+            color: var(--primary);
+            text-decoration: none;
+            font-size: 0.85rem;
+            font-weight: 500;
+            margin-top: 0.5rem;
+            display: inline-block;
+        }
+
+        .view-details:hover {
+            text-decoration: underline;
+        }
+
+        .order-details-grid {
+            display: grid;
+            grid-template-columns: repeat(auto-fit, minmax(200px, 1fr));
+            gap: 1rem;
+            margin-bottom: 1rem;
+            font-size: 0.9rem;
+        }
+
+        .detail-label {
+            color: var(--text-light);
+            font-weight: 500;
+        }
+
+        /* Order Items Table */
+        .order-items-table {
+            width: 100%;
+            background: white;
+            border-radius: 8px;
+            overflow: hidden;
+            margin-bottom: 1rem;
+            font-size: 0.85rem;
+        }
+
+        .order-items-table th {
+            background: var(--secondary);
+            padding: 0.75rem;
+            font-weight: 600;
+            color: var(--text-dark);
+            border-bottom: 1px solid var(--border);
+        }
+
+        .order-items-table td {
+            padding: 0.75rem;
+            border-bottom: 1px solid var(--border);
+        }
+
+        .order-items-table tr:hover {
+            background: var(--secondary);
+        }
+
+        /* Review Button */
+        .review-btn {
+            background: #10b981;
+            color: white;
+            border: none;
+            padding: 0.5rem 1rem;
+            border-radius: 6px;
+            font-size: 0.85rem;
+            font-weight: 500;
+            transition: var(--transition);
+        }
+
+        .review-btn:hover {
+            background: #059669;
+            transform: translateY(-1px);
+        }
+
+        /* No Orders */
+        .no-orders {
+            text-align: center;
+            padding: 3rem;
+            color: var(--text-light);
+        }
+
+        .no-orders h4 {
+            margin-top: 1rem;
+            font-weight: 600;
+        }
+
+        /* Logout Tab */
+        .logout-content {
+            max-width: 400px;
+            margin: 0 auto;
+            text-align: center;
+            padding: 3rem 1rem;
+        }
+
+        .logout-btn {
+            background: #ef4444;
+            color: white;
+            padding: 0.75rem 2rem;
+            font-weight: 500;
+            border-radius: 8px;
+            text-decoration: none;
+            display: inline-block;
+            transition: var(--transition);
+        }
+
+        .logout-btn:hover {
+            background: #dc2626;
+            transform: translateY(-2px);
+            color: white;
+        }
+
+        /* Form Buttons */
+        .form-buttons {
+            margin-top: 1rem;
+        }
+
+        /* Responsive */
+        @media (max-width: 768px) {
+            .profile-container {
+                padding: 1.5rem;
+                margin: 1rem;
+                border-radius: 0;
+            }
+
+            .order-details-grid {
+                grid-template-columns: 1fr;
+            }
+
+            .order-items-table {
+                font-size: 0.8rem;
+            }
+
+            .order-items-table th,
+            .order-items-table td {
+                padding: 0.5rem;
+            }
+        }
+
+        @media (max-width: 576px) {
+            .profile-title {
+                font-size: 1.5rem;
+            }
+
+            .profile-container {
+                padding: 1rem;
+                margin: 0.5rem;
+            }
+
+            .accordion-body {
+                padding: 1rem;
+            }
+
+            .profile-img {
+                width: 120px;
+                height: 120px;
+            }
+
+            .navbar {
+                padding: 0.5rem 1rem;
+            }
+        }
+    </style>
+</head>
+<body>
+
+<!-- NAVBAR -->
+<nav class="navbar navbar-expand-lg">
+    <div class="container-fluid">
+        <a class="navbar-brand" href="{{ url_for('home') }}">
+            <img src="{{ url_for('static', filename='images/logo-black.png') }}" alt="Logo">
+        </a>
+
+        <button class="navbar-toggler" type="button" data-bs-toggle="collapse" data-bs-target="#navMenu">
+            <span class="navbar-toggler-icon"></span>
+        </button>
+
+        <div class="collapse navbar-collapse" id="navMenu">
+            <ul class="navbar-nav ms-auto align-items-center gap-3">
+                <li class="nav-item">
+                    <a class="nav-link position-relative" href="{{ url_for('cart') }}"> Cart
+                        <i class="bi bi-bag"></i>
+                        {% if items and items|length > 0 %}
+                        <span class="cart-badge">{{ items|length }}</span>
+                        {% endif %}
+                    </a>
+                </li>
+                <li class="nav-item">
+                    <a class="nav-link" href="{{ url_for('profile') }}">
+                        <i class="bi bi-person me-1"></i>Profile
+                    </a>
+                </li>
+                <li class="nav-item">
+                    <a class="nav-link" href="{{ url_for('about') }}">
+                        <i class="bi bi-info-circle me-1"></i>About
+                    </a>
+                </li>
+            </ul>
+        </div>
+    </div>
+</nav>
+
+<div class="profile-container">
+    <!-- Header -->
+    <div class="profile-header">
+        <h1 class="profile-title">My Profile</h1>
+    </div>
+
+    <!-- Tabs -->
+    <ul class="nav nav-tabs" id="profileTabs" role="tablist">
+        <li class="nav-item" role="presentation">
+            <button class="nav-link active" id="profile-tab" data-bs-toggle="tab" data-bs-target="#profile" type="button">
+                Profile Info
+            </button>
+        </li>
+        <li class="nav-item" role="presentation">
+            <button class="nav-link" id="orders-tab" data-bs-toggle="tab" data-bs-target="#orders" type="button">
+                My Orders
+            </button>
+        </li>
+        <li class="nav-item" role="presentation">
+            <button class="nav-link" id="logout-tab" data-bs-toggle="tab" data-bs-target="#logout" type="button">
+                Logout
+            </button>
+        </li>
+    </ul>
+
+    <!-- Tab Content -->
+    <div class="tab-content mt-4" id="profileTabsContent">
+        <!-- Profile Info -->
+        <div class="tab-pane fade show active" id="profile">
+            <div class="accordion" id="profileAccordion">
+                <!-- Details Section -->
+                <div class="accordion-item">
+                    <h2 class="accordion-header">
+                        <button class="accordion-button" type="button" data-bs-toggle="collapse" data-bs-target="#collapseDetails">
+                            Personal Details
+                        </button>
+                    </h2>
+                    <div id="collapseDetails" class="accordion-collapse collapse show">
+                        <div class="accordion-body">
+                            <form id="detailsForm" enctype="multipart/form-data">
+                                <input type="hidden" name="action" value="update_details">
+                                
+                                <div class="profile-img-container">
+                                    {% if user[4] %}
+                                    <img id="profilePreview" 
+                                         src="{{ url_for('static', filename=user[4]) }}" 
+                                         class="profile-img" 
+                                         alt="Profile Image">
+                                    {% else %}
+                                    <img id="profilePreview" 
+                                         src="https://ui-avatars.com/api/?name={{ user[0]|urlencode }}&background=4f46e5&color=fff" 
+                                         class="profile-img" 
+                                         alt="Profile Image">
+                                    {% endif %}
+                                    
+                                    <label class="file-input-label">
+                                        Change Photo
+                                        <input type="file" 
+                                               name="profile_img" 
+                                               class="d-none" 
+                                               accept="image/*" 
+                                               onchange="previewProfileImage(event)">
+                                    </label>
+                                </div>
+
+                                <div class="mb-3">
+                                    <label class="form-label">Full Name</label>
+                                    <input type="text" 
+                                           name="name" 
+                                           class="form-control" 
+                                           value="{{ user[0] }}" 
+                                           required>
+                                </div>
+
+                                <div class="mb-3">
+                                    <label class="form-label">Email Address</label>
+                                    <input type="email" 
+                                           name="email" 
+                                           class="form-control" 
+                                           value="{{ user[1] }}" 
+                                           required>
+                                </div>
+
+                                <button type="submit" class="btn btn-primary w-100">
+                                    Update Details
+                                </button>
+                            </form>
+                        </div>
+                    </div>
+                </div>
+
+                <!-- Address Section -->
+                <div class="accordion-item">
+                    <h2 class="accordion-header">
+                        <button class="accordion-button collapsed" type="button" data-bs-toggle="collapse" data-bs-target="#collapseAddress">
+                            Default Address
+                        </button>
+                    </h2>
+                    <div id="collapseAddress" class="accordion-collapse collapse">
+                        <div class="accordion-body">
+                            <form id="addressForm">
+                                <input type="hidden" name="action" value="update_address">
+                                <div class="mb-3">
+                                    <label class="form-label">Phone Number</label>
+                                    <input type="tel" 
+                                           name="phone" 
+                                           class="form-control" 
+                                           value="{{ user[2] or '' }}">
+                                </div>
+                                
+                                <div class="mb-3">
+                                    <label class="form-label">Shipping Address</label>
+                                    <textarea name="address" 
+                                              class="form-control" 
+                                              rows="4">{{ user[3] or '' }}</textarea>
+                                </div>
+
+                                <button type="submit" class="btn btn-primary w-100 form-buttons">
+                                    Save Address
+                                </button>
+                            </form>
+                        </div>
+                    </div>
+                </div>
+
+                <!-- Password Section -->
+                <div class="accordion-item">
+                    <h2 class="accordion-header">
+                        <button class="accordion-button collapsed" type="button" data-bs-toggle="collapse" data-bs-target="#collapsePassword">
+                            Change Password
+                        </button>
+                    </h2>
+                    <div id="collapsePassword" class="accordion-collapse collapse">
+                        <div class="accordion-body">
+                            <form id="passwordForm">
+                                <input type="hidden" name="action" value="change_password">
+                                <div class="mb-3">
+                                    <label class="form-label">Current Password</label>
+                                    <input type="password" 
+                                           name="current_password" 
+                                           class="form-control" 
+                                           required>
+                                </div>
+                                
+                                <div class="mb-3">
+                                    <label class="form-label">New Password</label>
+                                    <input type="password" 
+                                           name="new_password" 
+                                           class="form-control" 
+                                           required 
+                                           minlength="6">
+                                </div>
+                                
+                                <div class="mb-3">
+                                    <label class="form-label">Confirm New Password</label>
+                                    <input type="password" 
+                                           name="confirm_password" 
+                                           class="form-control" 
+                                           required>
+                                </div>
+                                
+                                <button type="submit" class="btn btn-warning w-100 form-buttons">
+                                    Update Password
+                                </button>
+                            </form>
+                        </div>
+                    </div>
+                </div>
+            </div>
+        </div>
+
+        <!-- Orders -->
+        <div class="tab-pane fade" id="orders">
+            {% if orders %}
+                <!-- Status Tabs -->
+                <div class="status-pills">
+                    <ul class="nav nav-pills" id="orderStatusTabs" role="tablist">
+                        {% set statuses = ['Pending', 'Seller to Pack', 'To Ship', 'Out for Delivery', 'Delivered', 'Completed', 'Cancelled', 'Declined'] %}
+                        {% for status in statuses %}
+                        <li class="nav-item" role="presentation">
+                            <button class="nav-link {% if loop.first %}active{% endif %}"
+                                    id="tab-{{ loop.index }}"
+                                    data-bs-toggle="pill"
+                                    data-bs-target="#status-{{ loop.index }}"
+                                    type="button"
+                                    data-status="{{ status|lower }}">
+                                {{ status }}
+                                <span class="badge ms-1 status-count">0</span>
+                            </button>
+                        </li>
+                        {% endfor %}
+                    </ul>
+                </div>
+
+                <div class="tab-content">
+                    {% for status in statuses %}
+                    <div class="tab-pane fade {% if loop.first %}show active{% endif %}" id="status-{{ loop.index }}">
+                        {% set order_count = namespace(value=0) %}
+                        {% for order in orders %}
+                            {% if order[2]|lower == status|lower %}
+                                {% set order_count.value = order_count.value + 1 %}
+                            <div class="order-card">
+                                <div class="order-header">
+                                    <div>
+                                        <h5 class="order-id">Order #{{ order[0] }}</h5>
+                                        <a href="{{ url_for('order_details', order_id=order[0]) }}" 
+                                           class="view-details">
+                                            View Details
+                                        </a>
+                                    </div>
+                                    <span class="order-status status-{{ order[2]|replace(' ', '-')|lower }}">
+                                        {{ order[2] }}
+                                    </span>
+                                </div>
+
+                                <div class="order-details-grid">
+                                    <div>
+                                        <div class="detail-label">Placed on</div>
+                                        <div>{{ order[3] }}</div>
+                                    </div>
+                                    <div>
+                                        <div class="detail-label">Payment Method</div>
+                                        <div>{{ order[4] }}</div>
+                                    </div>
+                                    <div>
+                                        <div class="detail-label">Shipping Address</div>
+                                        <div>{{ order[5] }}, {{ order[6] }}, {{ order[7] }}</div>
+                                    </div>
+                                </div>
+
+                                {% if order_items.get(order[0]) %}
+                                <div class="table-responsive">
+                                    <table class="order-items-table">
+                                        <thead>
+                                            <tr>
+                                                <th>Product</th>
+                                                <th>Description</th>
+                                                <th>Variation</th>
+                                                <th>Qty</th>
+                                                <th>Price</th>
+                                                <th class="text-end">Subtotal</th>
+                                            </tr>
+                                        </thead>
+                                        <tbody>
+                                            {% for item in order_items[order[0]] %}
+                                                {% set product_name, description, qty, price, var_name, option_value = item %}
+                                                {% set subtotal = price * qty %}
+                                                <tr>
+                                                    <td>{{ product_name }}</td>
+                                                    <td>{{ description|truncate(50) }}</td>
+                                                    <td>
+                                                        {% if var_name and option_value %}
+                                                            {{ var_name }}: {{ option_value }}
+                                                        {% else %}
+                                                            -
+                                                        {% endif %}
+                                                    </td>
+                                                    <td>{{ qty }}</td>
+                                                    <td>₱{{ "%.2f"|format(price) }}</td>
+                                                    <td class="text-end">₱{{ "%.2f"|format(subtotal) }}</td>
+                                                </tr>
+                                            {% endfor %}
+                                        </tbody>
+                                    </table>
+                                </div>
+                                {% endif %}
+
+                                <div class="d-flex justify-content-between align-items-center">
+                                    <div>
+                                        {% if order[2]|lower == 'delivered' and not order.reviewed %}
+                                        <a href="{{ url_for('add_review', order_id=order[0]) }}" 
+                                           class="review-btn">
+                                            Add Review
+                                        </a>
+                                        {% endif %}
+                                        
+                                        {% if order[2]|lower == 'declined' and order[8] %}
+                                        <div class="text-danger" style="font-size: 0.85rem;">
+                                            <strong>Decline Reason:</strong> {{ order[8] }}
+                                        </div>
+                                        {% endif %}
+                                    </div>
+                                    
+                                    <div class="text-end">
+                                        <div style="font-size: 0.9rem; color: var(--text-light);">Total</div>
+                                        <div style="font-size: 1.25rem; font-weight: 600; color: var(--primary);">
+                                            ₱{{ "%.2f"|format(order[1]) }}
+                                        </div>
+                                    </div>
+                                </div>
+                            </div>
+                            {% endif %}
+                        {% endfor %}
+                        {% if order_count.value == 0 %}
+                        <div class="no-orders">
+                            <div style="font-size: 3rem; color: var(--border);">📦</div>
+                            <h4>No {{ status }} Orders</h4>
+                            <p>You don't have any orders in this status.</p>
+                        </div>
+                        {% endif %}
+                    </div>
+                    {% endfor %}
+                </div>
+            {% else %}
+                <div class="no-orders">
+                    <div style="font-size: 3rem; color: var(--border);">📦</div>
+                    <h4>No Orders Yet</h4>
+                    <p>Start shopping to see your orders here!</p>
+                    <a href="/" class="btn btn-primary mt-3">Browse Products</a>
+                </div>
+            {% endif %}
+        </div>
+
+        <!-- Logout -->
+        <div class="tab-pane fade" id="logout">
+            <div class="logout-content">
+                <div style="font-size: 4rem; color: var(--text-light); opacity: 0.7;">⇥</div>
+                <h3 class="mb-3">Ready to Leave?</h3>
+                <p class="text-muted mb-4">
+                    You'll be redirected to the login page after signing out.
+                </p>
+                <button type="button" class="logout-btn" id="logoutBtn">
+               Logout
+               </button>
+
+            </div>
+        </div>
+    </div>
+</div>
+
+
+
+<script>
+// Profile Image Preview
+function previewProfileImage(event) {
+    const input = event.target;
+    const preview = document.getElementById('profilePreview');
+    
+    if (input.files && input.files[0]) {
+        const reader = new FileReader();
+        reader.onload = function(e) {
+            preview.src = e.target.result;
+        };
+        reader.readAsDataURL(input.files[0]);
+    }
+}
+
+// Update Status Counters
+function updateStatusCounters() {
+    const pills = document.querySelectorAll('#orderStatusTabs button');
+    pills.forEach(pill => {
+        const target = pill.dataset.bsTarget;
+        const tab = document.querySelector(target);
+        const count = tab ? tab.querySelectorAll('.order-card').length : 0;
+        const badge = pill.querySelector('.status-count');
+        
+        if (badge) {
+            badge.textContent = count;
+        }
+    });
+}
+
+// Initialize
+document.addEventListener('DOMContentLoaded', function() {
+    updateStatusCounters();
+    
+    // Update counters when switching tabs
+    document.querySelectorAll('#orderStatusTabs button').forEach(btn => {
+        btn.addEventListener('shown.bs.tab', updateStatusCounters);
+    });
+});
+
+// Form submissions
+document.getElementById('detailsForm')?.addEventListener('submit', function(e) {
+    e.preventDefault();
+
+    const formData = new FormData(this);
+
+    Swal.fire({
+        title: 'Save changes?',
+        icon: 'question',
+        showCancelButton: true,
+        confirmButtonText: 'Yes, save'
+    }).then((result) => {
+        if (!result.isConfirmed) return;
+
+        fetch('{{ url_for("profile") }}', {
+            method: 'POST',
+            body: formData,
+            headers: { 'X-Requested-With': 'XMLHttpRequest' }
+        })
+        .then(res => res.json())
+        .then(data => {
+            if (data.success) {
+                Swal.fire('Updated!', data.message, 'success');
+
+                if (data.profile_img) {
+                    const img = document.getElementById('profilePreview');
+                    if (img) {
+                        img.src = `/static/${data.profile_img}?t=` + new Date().getTime();
+                    }
+                }
+            } else {
+                Swal.fire('Error', data.message || 'Update failed', 'error');
+            }
+        })
+        .catch(() => {
+            Swal.fire('Error', 'Server error occurred', 'error');
+        });
+    });
+});
+
+document.getElementById('addressForm')?.addEventListener('submit', function(e) {
+    e.preventDefault();
+
+    const formData = new FormData(this);
+
+    Swal.fire({
+        title: 'Save address?',
+        icon: 'question',
+        showCancelButton: true,
+        confirmButtonText: 'Yes, save'
+    }).then((result) => {
+        if (!result.isConfirmed) return;
+
+        fetch('{{ url_for("profile") }}', {
+            method: 'POST',
+            body: formData,
+            headers: { 'X-Requested-With': 'XMLHttpRequest' }
+        })
+        .then(res => res.json())
+        .then(data => {
+            if (data.success) {
+                Swal.fire('Updated!', 'Address saved successfully', 'success');
+            } else {
+                Swal.fire('Error', data.message || 'Update failed', 'error');
+            }
+        })
+        .catch(() => {
+            Swal.fire('Error', 'Server error occurred', 'error');
+        });
+    });
+});
+
+document.getElementById('passwordForm').addEventListener('submit', function (e) {
+    e.preventDefault();
+
+    const formData = new FormData(this);
+
+    Swal.fire({
+        title: 'Change password?',
+        icon: 'warning',
+        showCancelButton: true,
+        confirmButtonText: 'Yes, change it'
+    }).then((result) => {
+        if (result.isConfirmed) {
+            fetch('{{ url_for("change_password") }}', {
+                method: 'POST',
+                body: formData,
+                headers: { 'X-Requested-With': 'XMLHttpRequest' }
+            })
+            .then(res => res.json())
+            .then(data => {
+                if (data.success) {
+    Swal.fire({
+        icon: 'success',
+        title: 'Password Updated Successfully',
+        text: 'Your password has been changed. Please use your new password next time you log in.',
+        timer: 2500,
+        showConfirmButton: false
+    });
+
+    document.getElementById('passwordForm').reset();
+
+    const passwordCollapse = document.getElementById('collapsePassword');
+    if (passwordCollapse) {
+        bootstrap.Collapse.getOrCreateInstance(passwordCollapse).hide();
+    }
+
+                } else {
+                    Swal.fire('Error', data.message, 'error');
+                }
+            })
+            .catch(() => {
+                Swal.fire('Error', 'Server error occurred', 'error');
+            });
+        }
+    });
+});
+
+
+// Auto-refresh for orders tab
+let ordersInterval = null;
+
+function refreshOrdersAndCounters() {
+    fetch(window.location.href, {
+        headers: { 'X-Requested-With': 'XMLHttpRequest' }
+    })
+    .then(res => res.text())
+    .then(html => {
+        const parser = new DOMParser();
+        const doc = parser.parseFromString(html, 'text/html');
+
+        const statuses = document.querySelectorAll('#orderStatusTabs button');
+        statuses.forEach(pill => {
+            const tabId = pill.dataset.bsTarget;
+            const statusTab = document.querySelector(tabId);
+            const newTab = doc.querySelector(tabId);
+
+            if (statusTab && newTab) {
+                const oldHTML = statusTab.innerHTML;
+                statusTab.innerHTML = newTab.innerHTML;
+
+                // Highlight new/updated orders
+                if (oldHTML !== newTab.innerHTML) {
+                    statusTab.querySelectorAll('.order-card').forEach(card => {
+                        card.classList.add('order-updated');
+                        const header = card.querySelector('.order-id');
+                        if (header && !header.querySelector('.updated-badge')) {
+                            const badge = document.createElement('span');
+                            badge.className = 'updated-badge';
+                            badge.textContent = 'Updated just now';
+                            header.appendChild(badge);
+                            setTimeout(() => badge.remove(), 5000);
+                        }
+                    });
+                }
+
+                // Update pill counter
+                const count = statusTab.querySelectorAll('.order-card').length;
+                const badge = pill.querySelector('.status-count');
+                if (badge) badge.textContent = count;
+            }
+        });
+    })
+    .catch(err => console.error('Orders refresh failed', err));
+}
+
+// Start interval when Orders tab is opened
+document.getElementById('orders-tab').addEventListener('shown.bs.tab', () => {
+    if (!ordersInterval) {
+        refreshOrdersAndCounters(); // initial refresh
+        ordersInterval = setInterval(refreshOrdersAndCounters, 10000); // every 10s
+    }
+});
+
+// Stop interval when leaving Orders tab
+['profile-tab', 'logout-tab'].forEach(id => {
+    document.getElementById(id).addEventListener('shown.bs.tab', () => {
+        if (ordersInterval) {
+            clearInterval(ordersInterval);
+            ordersInterval = null;
+        }
+    });
+});
+
+document.getElementById('logoutBtn')?.addEventListener('click', function () {
+    Swal.fire({
+        title: 'Are you sure you want to log out?',
+        text: 'You will be redirected to the login page.',
+        icon: 'warning',
+        showCancelButton: true,
+        confirmButtonText: 'Yes, log out',
+        cancelButtonText: 'Cancel',
+        confirmButtonColor: '#ef4444',
+        cancelButtonColor: '#64748b'
+    }).then((result) => {
+        if (result.isConfirmed) {
+            Swal.fire({
+                icon: 'success',
+                title: 'Logged Out Successfully',
+                text: 'You have been signed out.',
+                timer: 1800,
+                showConfirmButton: false
+            });
+
+            setTimeout(() => {
+                window.location.href = "{{ url_for('logout') }}";
+            }, 1800);
+        }
+    });
+});
+</script>
+
+</body>
+</html>

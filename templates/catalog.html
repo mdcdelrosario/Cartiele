@@ -1,0 +1,977 @@
+<!DOCTYPE html>
+<html lang="en">
+<head>
+<meta charset="UTF-8">
+<title>Products</title>
+<meta name="viewport" content="width=device-width, initial-scale=1.0">
+
+<link rel="stylesheet" href="{{ url_for('static', filename='css/bootstrap.min.css') }}">
+<link rel="stylesheet" href="{{ url_for('static', filename='css/bootstrap-icons.css') }}">
+<script src="{{ url_for('static', filename='js/sweetalert2.all.min.js') }}"></script>
+<script src="{{ url_for('static', filename='js/bootstrap.bundle.min.js') }}"></script>
+
+<style>
+:root {
+    --primary: #4f46e5;
+    --primary-dark: #4338ca;
+    --secondary: #f8fafc;
+    --accent: #f97316;
+    --text-dark: #334155;
+    --text-light: #64748b;
+    --border: #e2e8f0;
+    --shadow: 0 4px 12px rgba(0, 0, 0, 0.05);
+    --shadow-hover: 0 8px 24px rgba(0, 0, 0, 0.1);
+    --radius: 10px;
+    --transition: all 0.25s ease;
+}
+
+body {
+    background: #f9fafb;
+    font-family: -apple-system, BlinkMacSystemFont, 'Segoe UI', Roboto, sans-serif;
+    color: var(--text-dark);
+    line-height: 1.5;
+}
+
+/* ================= NAVBAR ================= */
+.navbar {
+    background: white;
+    padding: 0.75rem 1.5rem;
+    box-shadow: 0 2px 10px rgba(0,0,0,0.05);
+    border-bottom: 1px solid var(--border);
+}
+
+.navbar-brand {
+    font-weight: 700;
+    font-size: 1.25rem;
+    color: var(--primary);
+}
+
+.navbar-brand img {
+    height: 50px;
+    width: auto;
+}
+
+.nav-link {
+    font-weight: 500;
+    font-size: 0.95rem;
+    color: var(--text-dark);
+    padding: 0.5rem 0.75rem !important;
+}
+
+.nav-link:hover, .nav-link.active {
+    color: var(--primary);
+}
+
+.cart-badge {
+    position: absolute;
+    top: -5px;
+    right: -5px;
+    background: var(--accent);
+    color: white;
+    font-size: 0.7rem;
+    width: 16px;
+    height: 16px;
+    border-radius: 50%;
+    display: flex;
+    align-items: center;
+    justify-content: center;
+}
+
+/* ================= HEADER ================= */
+.header-container {
+    max-width: 1200px;
+    margin: 1.5rem auto;
+    padding: 0 1rem;
+}
+
+.header-title {
+    font-size: 1.5rem;
+    font-weight: 700;
+    color: var(--text-dark);
+    margin-bottom: 0.25rem;
+}
+
+.header-subtitle {
+    color: var(--text-light);
+    font-size: 0.9rem;
+    max-width: 600px;
+}
+
+/* ================= PROMO CAROUSEL ================= */
+.promo-wrapper {
+    max-width: 1000px;
+    margin: 0 auto 2rem;
+    border-radius: 12px;
+    overflow: hidden;
+    box-shadow: var(--shadow);
+}
+
+.carousel-item img {
+    height: 240px;
+    object-fit: cover;
+    object-position: center;
+}
+
+.carousel-control-prev,
+.carousel-control-next {
+    width: 40px;
+    height: 40px;
+    background: rgba(255, 255, 255, 0.9);
+    border-radius: 50%;
+    top: 50%;
+    transform: translateY(-50%);
+    margin: 0 0.75rem;
+}
+
+/* ================= MAIN LAYOUT ================= */
+.catalog-container {
+    max-width: 1200px;
+    margin: 0 auto 3rem;
+    padding: 0 1rem;
+    display: grid;
+    grid-template-columns: 1fr 250px; /* Reduced sidebar width */
+    gap: 1.5rem; /* Reduced gap */
+    align-items: start;
+}
+
+/* ================= FILTERS SIDEBAR ================= */
+.filters-sidebar {
+    background: white;
+    border-radius: var(--radius);
+    padding: 1.25rem;
+    box-shadow: var(--shadow);
+    position: sticky;
+    top: 20px;
+    border: 1px solid var(--border);
+    max-height: calc(100vh - 40px);
+    overflow-y: auto;
+    z-index: 100;
+}
+
+.filters-header {
+    display: flex;
+    justify-content: space-between;
+    align-items: center;
+    margin-bottom: 1.25rem;
+    padding-bottom: 0.75rem;
+    border-bottom: 1px solid var(--border);
+}
+
+.filters-header h3 {
+    font-weight: 600;
+    font-size: 1rem; /* Smaller */
+    color: var(--text-dark);
+    margin: 0;
+}
+
+.clear-filters {
+    color: var(--text-light);
+    background: none;
+    border: none;
+    font-size: 0.8rem; /* Smaller */
+    cursor: pointer;
+    padding: 0.25rem 0.5rem;
+}
+
+.clear-filters:hover {
+    color: var(--primary);
+}
+
+.filter-group {
+    margin-bottom: 1rem; /* Reduced */
+}
+
+.filter-group label {
+    display: block;
+    font-weight: 500;
+    font-size: 0.85rem; /* Smaller */
+    margin-bottom: 0.375rem;
+    color: var(--text-dark);
+}
+
+.filter-group input,
+.filter-group select {
+    width: 100%;
+    padding: 0.5rem 0.75rem;
+    border: 1px solid var(--border);
+    border-radius: 6px;
+    font-size: 0.85rem; /* Smaller */
+    transition: var(--transition);
+    background: white;
+}
+
+.filter-group input:focus,
+.filter-group select:focus {
+    outline: none;
+    border-color: var(--primary);
+    box-shadow: 0 0 0 2px rgba(79, 70, 229, 0.1);
+}
+
+.price-inputs {
+    display: grid;
+    grid-template-columns: 1fr 1fr;
+    gap: 0.5rem; /* Reduced */
+}
+
+/* ================= PRODUCTS SECTION ================= */
+.products-section {
+    position: relative;
+}
+
+.products-header {
+    display: flex;
+    justify-content: space-between;
+    align-items: center;
+    margin-bottom: 1.25rem; /* Reduced */
+    padding: 0.75rem 0;
+    border-bottom: 1px solid var(--border);
+}
+
+.results-count {
+    font-weight: 500;
+    font-size: 0.85rem; /* Smaller */
+    color: var(--text-light);
+}
+
+.sort-select {
+    padding: 0.375rem 0.75rem;
+    border: 1px solid var(--border);
+    border-radius: 6px;
+    background: white;
+    font-size: 0.85rem; /* Smaller */
+    cursor: pointer;
+    min-width: 140px;
+}
+
+/* ================= PRODUCTS GRID ================= */
+.products-grid {
+    display: grid;
+    grid-template-columns: repeat(auto-fill, minmax(180px, 1fr)); /* Smaller cards */
+    gap: 1rem; /* Reduced gap */
+}
+
+/* ================= PRODUCT CARD ================= */
+.product-card {
+    background: white;
+    border-radius: var(--radius);
+    overflow: hidden;
+    box-shadow: var(--shadow);
+    transition: var(--transition);
+    border: 1px solid var(--border);
+    height: 100%;
+    position: relative;
+    cursor: pointer;
+}
+
+.product-card:hover {
+    transform: translateY(-3px); /* Reduced hover lift */
+    box-shadow: var(--shadow-hover);
+    border-color: var(--primary);
+}
+
+.product-badge {
+    position: absolute;
+    top: 0.5rem;
+    left: 0.5rem;
+    background: var(--accent);
+    color: white;
+    padding: 0.125rem 0.5rem;
+    border-radius: 12px;
+    font-size: 0.65rem; /* Smaller */
+    font-weight: 600;
+    z-index: 2;
+}
+
+/* ================= IMAGE CAROUSEL ================= */
+.product-carousel {
+    height: 140px; /* Reduced height */
+    position: relative;
+    overflow: hidden;
+}
+
+.product-carousel img {
+    width: 100%;
+    height: 100%;
+    object-fit: cover;
+    transition: transform 0.3s ease;
+}
+
+.product-card:hover .product-carousel img {
+    transform: scale(1.03); /* Reduced zoom */
+}
+
+.carousel-indicators {
+    position: absolute;
+    bottom: 0.5rem;
+    left: 50%;
+    transform: translateX(-50%);
+    display: flex;
+    gap: 0.25rem;
+    margin: 0;
+}
+
+.carousel-indicators button {
+    width: 5px; /* Smaller */
+    height: 5px; /* Smaller */
+    border-radius: 50%;
+    border: none;
+    background: rgba(255, 255, 255, 0.5);
+    padding: 0;
+    transition: var(--transition);
+}
+
+.carousel-indicators .active {
+    background: white;
+}
+
+/* ================= CARD BODY ================= */
+.card-body {
+    padding: 0.75rem; /* Reduced padding */
+}
+
+.product-category {
+    font-size: 0.7rem; /* Smaller */
+    color: var(--primary);
+    font-weight: 600;
+    text-transform: uppercase;
+    letter-spacing: 0.3px;
+    margin-bottom: 0.25rem;
+}
+
+.product-title {
+    font-size: 0.85rem; /* Smaller */
+    font-weight: 500;
+    line-height: 1.3; /* Tighter */
+    margin-bottom: 0.5rem; /* Reduced */
+    color: var(--text-dark);
+    display: -webkit-box;
+    -webkit-line-clamp: 2;
+    -webkit-box-orient: vertical;
+    overflow: hidden;
+    height: 2.2em; /* Reduced height */
+}
+
+.product-price {
+    font-size: 0.95rem; /* Smaller */
+    font-weight: 700;
+    color: var(--primary);
+    display: flex;
+    align-items: center;
+    gap: 0.5rem;
+}
+
+.product-price span {
+    font-size: 0.75rem; /* Smaller */
+    color: var(--text-light);
+    font-weight: 400;
+    text-decoration: line-through;
+}
+
+/* ================= AUTOSUGGEST ================= */
+.autocomplete-container {
+    position: relative;
+}
+
+#suggestions {
+    position: absolute;
+    top: 100%;
+    left: 0;
+    right: 0;
+    background: white;
+    border-radius: 6px;
+    box-shadow: var(--shadow-hover);
+    z-index: 1000;
+    margin-top: 0.25rem;
+    overflow: hidden;
+    border: 1px solid var(--border);
+    display: none;
+}
+
+#suggestions.show {
+    display: block;
+}
+
+.suggestion-item {
+    padding: 0.5rem 0.75rem;
+    font-size: 0.85rem; /* Smaller */
+    cursor: pointer;
+    transition: var(--transition);
+    border-bottom: 1px solid var(--border);
+}
+
+.suggestion-item:last-child {
+    border-bottom: none;
+}
+
+.suggestion-item:hover {
+    background: var(--secondary);
+}
+
+/* ================= NO RESULTS ================= */
+.no-results {
+    grid-column: 1 / -1;
+    text-align: center;
+    padding: 2rem 1rem; /* Reduced */
+}
+
+.no-results i {
+    font-size: 1.5rem; /* Smaller */
+    color: var(--border);
+    margin-bottom: 0.75rem;
+}
+
+.no-results h4 {
+    color: var(--text-light);
+    font-weight: 500;
+    margin-bottom: 0.25rem;
+    font-size: 0.95rem; /* Smaller */
+}
+
+.no-results p {
+    color: var(--text-light);
+    font-size: 0.85rem; /* Smaller */
+}
+
+/* ================= FOOTER ================= */
+.footer {
+    background: white;
+    border-top: 1px solid var(--border);
+    padding: 1.5rem 0; /* Reduced */
+    margin-top: 2rem; /* Reduced */
+}
+
+.footer-content {
+    max-width: 1200px;
+    margin: 0 auto;
+    padding: 0 1rem;
+    display: grid;
+    grid-template-columns: repeat(auto-fit, minmax(180px, 1fr)); /* Smaller */
+    gap: 1.5rem;
+}
+
+.footer-section h5 {
+    font-weight: 600;
+    font-size: 0.9rem; /* Smaller */
+    margin-bottom: 0.75rem;
+    color: var(--text-dark);
+}
+
+.footer-section a {
+    display: block;
+    color: var(--text-light);
+    text-decoration: none;
+    font-size: 0.8rem; /* Smaller */
+    margin-bottom: 0.375rem;
+    transition: var(--transition);
+}
+
+.footer-section a:hover {
+    color: var(--primary);
+}
+
+/* ================= RESPONSIVE ================= */
+@media (max-width: 1024px) {
+    .catalog-container {
+        grid-template-columns: 1fr;
+        gap: 1.5rem;
+    }
+    
+    .filters-sidebar {
+        position: static;
+        height: auto;
+        max-height: none;
+        margin-bottom: 1rem;
+        top: 0;
+    }
+    
+    .products-grid {
+        grid-template-columns: repeat(auto-fill, minmax(160px, 1fr)); /* Smaller */
+    }
+    
+    .promo-wrapper {
+        margin: 0 1rem 1.5rem;
+    }
+    
+    .carousel-item img {
+        height: 200px;
+    }
+}
+
+@media (max-width: 768px) {
+    .header-title {
+        font-size: 1.3rem; /* Smaller */
+    }
+    
+    .products-grid {
+        grid-template-columns: repeat(auto-fill, minmax(140px, 1fr)); /* Smaller */
+        gap: 0.75rem; /* Reduced */
+    }
+    
+    .product-carousel {
+        height: 120px; /* Smaller */
+    }
+    
+    .carousel-item img {
+        height: 180px; /* Smaller */
+    }
+}
+
+@media (max-width: 576px) {
+    .products-grid {
+        grid-template-columns: repeat(2, 1fr);
+    }
+    
+    .price-inputs {
+        grid-template-columns: 1fr;
+    }
+    
+    .products-header {
+        flex-direction: column;
+        align-items: flex-start;
+        gap: 0.5rem;
+    }
+    
+    .sort-select {
+        width: 100%;
+    }
+    
+    .card-body {
+        padding: 0.5rem; /* Smaller */
+    }
+    
+    .product-title {
+        font-size: 0.8rem; /* Smaller */
+        height: 2em; /* Smaller */
+    }
+    
+    .product-price {
+        font-size: 0.9rem; /* Smaller */
+    }
+}
+
+/* Custom scrollbar for filters */
+.filters-sidebar::-webkit-scrollbar {
+    width: 4px;
+}
+
+.filters-sidebar::-webkit-scrollbar-track {
+    background: #f1f1f1;
+    border-radius: 10px;
+}
+
+.filters-sidebar::-webkit-scrollbar-thumb {
+    background: #c1c1c1;
+    border-radius: 10px;
+}
+
+.filters-sidebar::-webkit-scrollbar-thumb:hover {
+    background: #a1a1a1;
+}
+</style>
+</head>
+
+<body>
+ <!-- NAVBAR -->
+    <nav class="navbar navbar-expand-lg">
+        <div class="container-fluid">
+            <a class="navbar-brand" href="{{ url_for('home') }}">
+                <img src="{{ url_for('static', filename='images/logo-black.png') }}" alt="Logo">
+            </a>
+
+            <button class="navbar-toggler" type="button" data-bs-toggle="collapse" data-bs-target="#navMenu">
+                <span class="navbar-toggler-icon"></span>
+            </button>
+
+            <div class="collapse navbar-collapse" id="navMenu">
+                <ul class="navbar-nav ms-auto align-items-center gap-1">
+                    <li class="nav-item">
+                        <a class="nav-link active position-relative" href="{{ url_for('cart') }}">Cart
+                            <i class="bi bi-bag"></i>
+                            {% if items and items|length > 0 %}
+                            <span class="cart-badge">{{ items|length }}</span>
+                            {% endif %}
+                        </a>
+                    </li>
+                    <li class="nav-item">
+                        <a class="nav-link" href="{{ url_for('profile') }}">
+                            <i class="bi bi-person me-1"></i>Profile
+                        </a>
+                    </li>
+                    <li class="nav-item">
+                        <a class="nav-link" href="{{ url_for('about') }}">
+                            <i class="bi bi-info-circle me-1"></i>About
+                        </a>
+                    </li>
+                </ul>
+            </div>
+        </div>
+    </nav>
+
+
+<!-- HEADER -->
+<div class="header-container">
+  <h1 class="header-title">Product Catalog</h1>
+  <p class="header-subtitle">Find what you're looking for</p>
+</div>
+
+<!-- PROMO CAROUSEL -->
+<div class="promo-wrapper">
+  <div id="promoCarousel" class="carousel slide" data-bs-ride="carousel">
+    <div class="carousel-inner">
+      <div class="carousel-item active">
+        <img src="{{ url_for('static', filename='images/promo1.png') }}" alt="Promotion 1">
+      </div>
+      <div class="carousel-item">
+        <img src="{{ url_for('static', filename='images/promo2.png') }}" alt="Promotion 2">
+      </div>
+      <div class="carousel-item">
+        <img src="{{ url_for('static', filename='images/promo3.png') }}" alt="Promotion 3">
+      </div>
+    </div>
+    <button class="carousel-control-prev" type="button" data-bs-target="#promoCarousel" data-bs-slide="prev">
+      <span class="carousel-control-prev-icon" aria-hidden="true"></span>
+      <span class="visually-hidden">Previous</span>
+    </button>
+    <button class="carousel-control-next" type="button" data-bs-target="#promoCarousel" data-bs-slide="next">
+      <span class="carousel-control-next-icon" aria-hidden="true"></span>
+      <span class="visually-hidden">Next</span>
+    </button>
+  </div>
+</div>
+
+<!-- CATALOG -->
+<div class="catalog-container">
+
+  <!-- PRODUCTS SECTION -->
+  <div class="products-section">
+    <div class="products-header">
+      <div class="results-count">
+        <span id="productCount">{{ products|length }}</span> products
+      </div>
+      <select class="sort-select" id="sortSelect">
+        <option value="">Sort by</option>
+        <option value="price-low">Price: Low to High</option>
+        <option value="price-high">Price: High to Low</option>
+        <option value="name">Name: A to Z</option>
+      </select>
+    </div>
+
+    <div class="products-grid" id="productsGrid">
+      {% for product in products %}
+      <div class="product-card-wrapper"
+           onclick="window.location='{{ url_for('product_details', product_id=product.id) }}'">
+        
+        <div class="product-card"
+             data-name="{{ product.name|lower }}"
+             data-price="{{ product.price }}"
+             data-category="{{ product.category|lower }}"
+             data-rating="{{ product.rating or 0 }}">
+          
+          {% if product.discount %}
+          <div class="product-badge">-{{ product.discount }}%</div>
+          {% endif %}
+          
+          <!-- IMAGE CAROUSEL -->
+          <div id="carousel-{{ product.id }}" class="carousel slide product-carousel">
+            <div class="carousel-inner">
+              {% for img in product.images %}
+              <div class="carousel-item {% if loop.first %}active{% endif %}">
+                <img src="{{ url_for('static', filename=img) }}" alt="{{ product.name }}">
+              </div>
+              {% endfor %}
+            </div>
+            
+            {% if product.images|length > 1 %}
+            <div class="carousel-indicators">
+              {% for img in product.images %}
+              <button type="button"
+                      data-bs-target="#carousel-{{ product.id }}"
+                      data-bs-slide-to="{{ loop.index0 }}"
+                      class="{% if loop.first %}active{% endif %}">
+              </button>
+              {% endfor %}
+            </div>
+            {% endif %}
+          </div>
+          
+          <div class="card-body">
+            <div class="product-category">{{ product.category }}</div>
+            <h5 class="product-title">{{ product.name }}</h5>
+            <div class="product-price">
+              ₱{{ '%.2f'|format(product.price) }}
+              {% if product.original_price %}
+              <span>₱{{ '%.2f'|format(product.original_price) }}</span>
+              {% endif %}
+            </div>
+          </div>
+          
+        </div>
+      </div>
+      {% endfor %}
+    </div>
+    
+    <!-- NO RESULTS MESSAGE -->
+    <div id="noResults" class="no-results" style="display: none;">
+      <i class="bi bi-search"></i>
+      <h4>No products found</h4>
+      <p>Try adjusting your filters</p>
+    </div>
+  </div>
+
+  <!-- FILTERS SIDEBAR -->
+  <div class="filters-sidebar">
+    <div class="filters-header">
+      <h3>Filters</h3>
+      <button class="clear-filters" id="clearFilters">
+        Clear all
+      </button>
+    </div>
+    
+    <div class="filter-group">
+      <label for="searchBox">Search</label>
+      <div class="autocomplete-container">
+        <input id="searchBox" class="form-control" placeholder="Product name...">
+        <div id="suggestions"></div>
+      </div>
+    </div>
+    
+    <div class="filter-group">
+      <label>Price Range</label>
+      <div class="price-inputs">
+        <div>
+          <input id="minPrice" type="number" class="form-control" placeholder="Min ₱" min="0">
+        </div>
+        <div>
+          <input id="maxPrice" type="number" class="form-control" placeholder="Max ₱" min="0">
+        </div>
+      </div>
+    </div>
+    
+    <div class="filter-group">
+      <label for="categorySelect">Category</label>
+      <select id="categorySelect" class="form-control">
+        <option value="">All Categories</option>
+        <option value="clothing">Clothing</option>
+        <option value="electronics">Electronics</option>
+        <option value="personal care & beauty">Personal Care & Beauty</option>
+        <option value="groceries">Groceries</option>
+        <option value="appliances">Appliances</option>
+        <option value="toys/sports">Toys/Sports</option>
+        <option value="shoes & footwear">Shoes & Footwear</option>
+        <option value="home collections">Home Collections</option>
+        <option value="automotive">Automotive</option>
+        <option value="books">Books</option>
+      </select>
+    </div>
+    
+  </div>
+</div>
+
+<!-- FOOTER -->
+<div class="footer">
+  <div class="footer-content">
+    <div class="footer-section">
+      <h5>Cartiele</h5>
+      <p style="color: var(--text-light); font-size: 0.8rem;">Quality products, great prices</p>
+    </div>
+    <div class="footer-section">
+      <h5>Links</h5>
+      <a href="{{ url_for('catalog') }}">Home</a>
+      <a href="{{ url_for('cart') }}">Cart</a>
+      <a href="{{ url_for('profile') }}">Account</a>
+      <a href="{{ url_for('about') }}">About</a>
+    </div>
+  </div>
+</div>
+
+{% if session.get('login_success') %}
+<script>
+document.addEventListener('DOMContentLoaded', function() {
+    Swal.fire({
+        icon: 'success',
+        title: 'Login Successful',
+        text: 'Welcome back, {{ session.get("user_name") }}!',
+        timer: 2200,
+        showConfirmButton: false
+    });
+});
+</script>
+{% endif %}
+
+
+<!-- FILTER SCRIPT -->
+<script>
+document.addEventListener('DOMContentLoaded', function() {
+  const searchBox = document.getElementById("searchBox");
+  const suggestions = document.getElementById("suggestions");
+  const minPriceInput = document.getElementById("minPrice");
+  const maxPriceInput = document.getElementById("maxPrice");
+  const categorySelect = document.getElementById("categorySelect");
+  const sortSelect = document.getElementById("sortSelect");
+  const clearFilters = document.getElementById("clearFilters");
+  const productsGrid = document.getElementById("productsGrid");
+  const noResults = document.getElementById("noResults");
+  const productCount = document.getElementById("productCount");
+
+  let productCards = Array.from(document.querySelectorAll(".product-card-wrapper"));
+  
+  // Initialize product data
+  productCards.forEach(card => {
+    const productCard = card.querySelector('.product-card');
+    card.dataset.name = productCard.dataset.name;
+    card.dataset.price = productCard.dataset.price;
+    card.dataset.category = productCard.dataset.category;
+  });
+
+  function applyAllFilters() {
+    const search = searchBox.value.toLowerCase().trim();
+    const minPrice = parseFloat(minPriceInput.value) || 0;
+    const maxPrice = parseFloat(maxPriceInput.value) || Infinity;
+    const selectedCategory = categorySelect.value.toLowerCase().trim();
+
+    let visibleCount = 0;
+    let filteredCards = [];
+
+    productCards.forEach(card => {
+      const name = card.dataset.name;
+      const price = parseFloat(card.dataset.price);
+      const category = card.dataset.category;
+
+      const matchesSearch = !search || name.includes(search);
+      const matchesPrice = price >= minPrice && price <= maxPrice;
+      const matchesCategory = !selectedCategory || category === selectedCategory;
+
+      const isVisible = matchesSearch && matchesPrice && matchesCategory;
+      
+      card.style.display = isVisible ? 'block' : 'none';
+      
+      if (isVisible) {
+        visibleCount++;
+        filteredCards.push(card);
+      }
+    });
+
+    productCount.textContent = visibleCount;
+    
+    if (visibleCount === 0) {
+      noResults.style.display = 'block';
+      productsGrid.style.display = 'none';
+    } else {
+      noResults.style.display = 'none';
+      productsGrid.style.display = 'grid';
+    }
+
+    return filteredCards;
+  }
+
+  function sortProducts(cards) {
+    const sortValue = sortSelect.value;
+    
+    if (!sortValue) return cards;
+    
+    const sorted = [...cards].sort((a, b) => {
+      const priceA = parseFloat(a.dataset.price);
+      const priceB = parseFloat(b.dataset.price);
+      const nameA = a.dataset.name;
+      const nameB = b.dataset.name;
+      
+      switch(sortValue) {
+        case 'price-low': return priceA - priceB;
+        case 'price-high': return priceB - priceA;
+        case 'name': return nameA.localeCompare(nameB);
+        default: return 0;
+      }
+    });
+    
+    return sorted;
+  }
+
+  function updateProducts() {
+    const filtered = applyAllFilters();
+    const sorted = sortProducts(filtered);
+    
+    // Reorder products in DOM
+    sorted.forEach(card => {
+      productsGrid.appendChild(card);
+    });
+  }
+
+  function updateSuggestions() {
+    const query = searchBox.value.toLowerCase().trim();
+    suggestions.innerHTML = '';
+    suggestions.classList.remove('show');
+    
+    if (!query) return;
+    
+    const uniqueProducts = new Set();
+    const suggestionsList = [];
+    
+    productCards.forEach(card => {
+      const name = card.dataset.name;
+      if (name.includes(query) && !uniqueProducts.has(name)) {
+        uniqueProducts.add(name);
+        suggestionsList.push(name);
+      }
+    });
+    
+    if (suggestionsList.length > 0) {
+      suggestionsList.slice(0, 5).forEach(productName => {
+        const div = document.createElement('div');
+        div.className = 'suggestion-item';
+        div.textContent = productName;
+        div.onclick = () => {
+          searchBox.value = productName;
+          suggestions.classList.remove('show');
+          updateProducts();
+        };
+        suggestions.appendChild(div);
+      });
+      suggestions.classList.add('show');
+    }
+  }
+
+  // Event Listeners
+  searchBox.addEventListener('input', () => {
+    updateSuggestions();
+    updateProducts();
+  });
+  
+  searchBox.addEventListener('focus', updateSuggestions);
+  
+  minPriceInput.addEventListener('input', updateProducts);
+  maxPriceInput.addEventListener('input', updateProducts);
+  categorySelect.addEventListener('change', updateProducts);
+  sortSelect.addEventListener('change', updateProducts);
+
+  clearFilters.addEventListener('click', () => {
+    searchBox.value = '';
+    minPriceInput.value = '';
+    maxPriceInput.value = '';
+    categorySelect.value = '';
+    sortSelect.value = '';
+    suggestions.classList.remove('show');
+    updateProducts();
+  });
+
+  document.addEventListener('click', (e) => {
+    if (!searchBox.contains(e.target) && !suggestions.contains(e.target)) {
+      suggestions.classList.remove('show');
+    }
+  });
+
+  // Prevent Enter key from submitting form
+  searchBox.addEventListener('keydown', (e) => {
+    if (e.key === 'Enter') {
+      e.preventDefault();
+      suggestions.classList.remove('show');
+      updateProducts();
+    }
+  });
+
+  // Initialize
+  updateProducts();
+});
+</script>
+
+</body>
+</html>

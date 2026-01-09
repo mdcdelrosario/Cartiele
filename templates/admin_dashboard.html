@@ -1,0 +1,981 @@
+<!DOCTYPE html>
+<html lang="en">
+<head>
+    <meta charset="UTF-8">
+    <title>Admin Dashboard</title>
+
+    <!-- Bootstrap -->
+    <link rel="stylesheet" href="{{ url_for('static', filename='css/bootstrap.min.css') }}">
+    <script src="{{ url_for('static', filename='js/bootstrap.bundle.min.js') }}"></script>
+
+    <!-- SweetAlert -->
+    <script src="{{ url_for('static', filename='js/sweetalert2/dist/sweetalert2.all.min.js') }}"></script>
+
+    <!-- ChartJS -->
+    <script src="https://cdn.jsdelivr.net/npm/chart.js"></script>
+
+    <style>
+        body {
+            background: #f1f3f6;
+            font-size: 14px;
+            overflow-x: hidden;
+        }
+
+        /* SIDEBAR */
+        .sidebar {
+            position: fixed;
+            left: 0;
+            top: 0;
+            width: 230px;
+            height: 100vh;
+            background: #111827;
+            padding: 20px 15px;
+            color: #fff;
+        }
+
+        .sidebar h5 {
+            text-align: center;
+            font-weight: 600;
+            margin-bottom: 30px;
+        }
+
+        .sidebar a {
+            display: flex;
+            align-items: center;
+            gap: 10px;
+            padding: 10px 14px;
+            border-radius: 10px;
+            margin-bottom: 6px;
+            color: #c7cbd6;
+            text-decoration: none;
+            font-size: 13.5px;
+        }
+
+        .sidebar a:hover,
+        .sidebar a.active {
+            background: #1f2937;
+            color: #fff;
+        }
+
+        /* CONTENT */
+        .content {
+            margin-left: 230px;
+            padding: 25px;
+        }
+
+        .dashboard-card {
+            background: #fff;
+            border-radius: 14px;
+            padding: 20px;
+            box-shadow: 0 6px 18px rgba(0,0,0,0.06);
+            margin-bottom: 25px;
+        }
+
+        .section-title {
+            font-size: 20px;
+            font-weight: 600;
+            margin-bottom: 15px;
+        }
+
+        table {
+            font-size: 13.5px;
+        }
+
+        .table th,
+        .table td {
+            vertical-align: middle;
+        }
+    </style>
+</head>
+
+<body>
+
+<!-- SIDEBAR -->
+<div class="sidebar">
+    <h5>Admin Panel</h5>
+    <a href="#products"> Products</a>
+    <a href="#users"> Users</a>
+    <a href="#passwords"> Password Requests</a>
+    <a href="#orders"> Orders</a>
+    <a href="#sales"> Sales</a>
+    <a href="#completed"> Orders History</a>
+
+    <hr class="text-secondary">
+    <a href="/catalog"> Catalog</a>
+   <a href="#" class="text-danger" onclick="confirmLogout(event)">
+     Logout
+</a>
+
+</div>
+
+<!-- MAIN CONTENT -->
+<div class="content">
+
+<!-- PRODUCTS -->
+<div id="products" class="dashboard-card">
+
+    <!-- Header -->
+    <div class="d-flex justify-content-between align-items-center mb-3">
+        <div class="section-title mb-0">📦 Products</div>
+
+        <!-- BUTTON TO OPEN MODAL -->
+<a href="/admin/add_product" class="btn btn-success me-2"> Add Product</a>
+    </div>
+
+    <!-- Filters -->
+    <div class="row g-2 mb-3">
+        <div class="col-md-4">
+            <input
+                type="text"
+                id="searchInput"
+                class="form-control"
+                placeholder="Search product"
+            >
+        </div>
+
+        <div class="col-md-4">
+            <select id="categorySelect" class="form-select">
+                <option value="">All Categories</option>
+                {% for cat in categories %}
+                    <option value="{{ cat }}">{{ cat }}</option>
+                {% endfor %}
+            </select>
+        </div>
+    </div>
+
+    <!-- Products Table -->
+    <div id="productsContainer">
+        <table class="table table-bordered table-hover">
+            <thead class="table-dark">
+                <tr>
+                    <th>ID</th>
+                    <th>Name</th>
+                    <th>Price (₱)</th>
+                    <th>Description</th>
+                    <th>Variations</th>
+                    <th>Actions</th>
+                </tr>
+            </thead>
+
+            <tbody>
+                {% for item in products %}
+                <tr>
+                    <td>{{ item.product[0] }}</td>
+                    <td>{{ item.product[1] }}</td>
+                    <td>{{ item.product[2] }}</td>
+                    <td>{{ item.product[3] }}</td>
+
+                    <!-- Variations -->
+                    <td>
+                        {% if item.variations|length > 0 %}
+                        <div class="dropdown">
+                            <button
+                                class="btn btn-sm btn-outline-secondary dropdown-toggle w-100"
+                                type="button"
+                                data-bs-toggle="dropdown"
+                            >
+                                View Variations
+                            </button>
+
+                            <ul class="dropdown-menu w-100 p-2">
+                                <li class="mb-2 d-flex justify-content-between fw-bold border-bottom pb-1">
+                                    <span>Variation</span>
+                                    <div class="d-flex gap-2">
+                                        <span>Stock</span>
+                                        <span>Extra Price</span>
+                                    </div>
+                                </li>
+
+                                {% for v in item.variations %}
+                                <li class="mb-1 d-flex justify-content-between align-items-center">
+                                    <span>{{ v[0] }}</span>
+
+                                    <div class="d-flex gap-2">
+                                        <span class="badge {% if v[1] < 5 %}bg-danger{% else %}bg-success{% endif %}">
+                                            {{ v[1] }}
+                                        </span>
+
+                                        {% if v[2] > 0 %}
+                                        <span class="badge bg-warning text-dark">
+                                            +₱{{ '%.2f'|format(v[2]) }}
+                                        </span>
+                                        {% else %}
+                                        <span class="text-muted">₱0.00</span>
+                                        {% endif %}
+                                    </div>
+                                </li>
+                                {% endfor %}
+                            </ul>
+                        </div>
+                        {% else %}
+                        <span class="text-muted">No variations</span>
+                        {% endif %}
+                    </td>
+
+                    <!-- Actions -->
+                    <td class="d-flex gap-1">
+                        <button
+                            class="btn btn-sm btn-danger"
+                            onclick="confirmDeleteProduct({{ item.product[0] }})"
+                        >
+                            Delete
+                        </button>
+
+                        <a
+                            href="/admin/edit_product/{{ item.product[0] }}"
+                            class="btn btn-sm btn-warning"
+                        >
+                            Edit
+                        </a>
+                    </td>
+                </tr>
+                {% endfor %}
+            </tbody>
+
+        </table>
+    </div>
+
+
+</div>
+
+
+
+<!-- USERS -->
+<div id="users" class="dashboard-card">
+    <div class="section-title"> 👤 Users </div>
+
+    <table class="table table-bordered table-hover">
+        <thead class="table-dark">
+            <tr>
+                <th>ID</th><th>Name</th><th>Email</th><th>Status</th>
+            </tr>
+        </thead>
+        <tbody>
+            {% for u in users %}
+            <tr>
+                <td>{{ u[0] }}</td>
+                <td>{{ u[1] }}</td>
+                <td>{{ u[2] }}</td>
+                <td>
+                    <select class="form-select form-select-sm"
+                        onchange="updateUserStatus({{ u[0] }}, this)"
+                        data-current="{{ u[5]|default('active') }}">
+                        <option value="active" {% if u[5]=='active' %}selected{% endif %}>Active</option>
+                        <option value="inactive" {% if u[5]=='inactive' %}selected{% endif %}>Inactive</option>
+                    </select>
+                </td>
+            </tr>
+            {% endfor %}
+        </tbody>
+    </table>
+</div>
+
+<!-- PASSWORD REQUESTS -->
+<div id="passwords" class="dashboard-card">
+    <div class="section-title">🔑 Password Reset Requests</div>
+
+    <table class="table table-bordered">
+        <thead class="table-dark">
+            <tr>
+                <th>ID</th><th>User</th><th>Email</th><th>Action</th>
+            </tr>
+        </thead>
+        <tbody>
+            {% for r in pending_password_resets %}
+            <tr>
+                <td>{{ r[0] }}</td>
+                <td>{{ r[1] }}</td>
+                <td>{{ r[2] }}</td>
+                <td>
+                    <button class="btn btn-sm btn-warning"
+                        onclick="changeRequestPassword({{ r[0] }}, '{{ r[2] }}')">
+                        Reset
+                    </button>
+                </td>
+            </tr>
+            {% else %}
+            <tr><td colspan="4" class="text-center text-muted">None</td></tr>
+            {% endfor %}
+        </tbody>
+    </table>
+</div>
+
+<!-- ORDERS -->
+ 
+<div id="orders" class="dashboard-card">
+    <div class="section-title">  🕒 Orders </div>
+
+   <table class="table table-bordered table-hover">
+        <thead class="table-dark">
+            <tr>
+                <th>Order ID</th>
+                <th>User Name</th>
+                <th>Email</th>
+                <th>Total (₱)</th>
+                <th>Status</th>
+                <th>Date</th>
+            </tr>
+        </thead>
+
+        <tbody>
+            {% for o in pending_orders %}
+          <tr id="order-{{ o[0] }}">
+
+                <td>{{ o[0] }}</td>
+                <td>{{ o[1] }}</td>
+                <td>{{ o[2] }}</td>
+                <td>₱{{ '%.2f'|format(o[3]) }}</td>
+
+                <!-- STATUS DROPDOWN -->
+        <td>
+    <span id="status-text-{{ o[0] }}" class="fw-bold text-warning d-block mb-1">
+        {{ o[4] }}
+    </span>
+
+    <select class="form-select mb-1"
+        onchange="confirmStatusChange(this, {{ o[0] }})"
+        data-current="{{ o[4] }}">
+   <option {% if o[4]=='Pending' %}selected{% endif %}>Pending</option>
+    <option {% if o[4]=='Seller to pack' %}selected{% endif %}>Seller to pack</option>
+    <option {% if o[4]=='To ship' %}selected{% endif %}>To ship</option>
+    <option {% if o[4]=='Out for Delivery' %}selected{% endif %}>Out for Delivery</option>
+    <option {% if o[4]=='Delivered' %}selected{% endif %}>Delivered</option>
+</select>
+
+
+    <button class="btn btn-sm btn-danger w-100"
+            onclick="declineOrder({{ o[0] }}, this)">
+        ❌ Decline
+    </button>
+    </td>
+
+
+                <td>{{ o[5] }}</td>
+            </tr>
+            {% endfor %}
+
+            {% if pending_orders|length == 0 %}
+            <tr>
+                <td colspan="6" class="text-center text-muted">No pending orders.</td>
+            </tr>
+            {% endif %}
+        </tbody>
+    </table>
+</div>
+
+<!-- SALES -->
+<div id="sales" class="dashboard-card">
+    <div class="d-flex justify-content-between align-items-center mb-3">
+        <div class="section-title mb-0">📊 Sales Summary</div>
+
+        <!-- DATE FILTER -->
+        <form method="GET" action="/admin/dashboard" class="d-flex align-items-center gap-2">
+            <label class="fw-semibold mb-0">Date</label>
+            <input 
+                type="date" 
+                name="date"
+                id="filterDate"
+                class="form-control form-control-sm"
+                value="{{ selected_date }}"
+                style="max-width: 160px;"
+            >
+        </form>
+    </div>
+
+    <!-- SALES CARDS -->
+    <div class="row text-center mb-4">
+        <div class="col-md-4">
+            <div class="border rounded-3 p-3">
+                <small class="text-muted">Daily Sales</small>
+                <h4 id="dailySales" class="text-success mb-0">
+                    ₱{{ '%.2f'|format(daily_sales) }}
+                </h4>
+            </div>
+        </div>
+
+        <div class="col-md-4">
+            <div class="border rounded-3 p-3">
+                <small class="text-muted">Weekly Sales</small>
+                <h4 id="weeklySales" class="text-primary mb-0">
+                    ₱{{ '%.2f'|format(weekly_sales) }}
+                </h4>
+            </div>
+        </div>
+
+        <div class="col-md-4">
+            <div class="border rounded-3 p-3">
+                <small class="text-muted">Monthly Sales</small>
+                <h4 id="monthlySales" class="text-warning mb-0">
+                    ₱{{ '%.2f'|format(monthly_sales) }}
+                </h4>
+            </div>
+        </div>
+    </div>
+
+    <!-- CHART -->
+    <canvas id="salesChart" height="100"></canvas>
+</div>
+
+<!-- COMPLETED -->
+<div id="completed" class="dashboard-card">
+    <div class="section-title">Orders History - Completed</div>
+
+    <table class="table table-bordered">
+        <thead class="table-dark">
+            <tr>
+                <th>ID</th><th>User</th><th>Total</th><th>Date</th>
+            </tr>
+        </thead>
+        <tbody>
+            {% for o in completed_orders %}
+            <tr>
+                <td>{{ o[0] }}</td>
+                <td>{{ o[1] }}</td>
+                <td>₱{{ '%.2f'|format(o[3]) }}</td>
+                <td>{{ o[5] }}</td>
+            </tr>
+            {% else %}
+            <tr><td colspan="4" class="text-center text-muted">None</td></tr>
+            {% endfor %}
+        </tbody>
+    </table>
+</div>
+
+</div>
+
+<script>
+document.addEventListener('DOMContentLoaded', function () {
+    {% with messages = get_flashed_messages(with_categories=true) %}
+        {% if messages %}
+            {% for category, message in messages %}
+                Swal.fire({
+                    icon: "{{ category }}",
+                    title: "{{ 'Success' if category == 'success' else 'Error' }}",
+                    text: "{{ message | escape }}",
+                    confirmButtonColor: "#0a0a0a",
+                    timer: {{ 1500 if category == 'success' else 'null' }},
+                    showConfirmButton: {{ "false" if category == 'success' else "true" }}
+                });
+            {% endfor %}
+        {% endif %}
+    {% endwith %}
+});
+function changeRequestPassword(requestId, userEmail) {
+    Swal.fire({
+        title: `Reset Password for ${userEmail}`,
+        html:
+            `<input type="password" id="newPass" class="swal2-input" placeholder="New Password">
+             <input type="password" id="confirmPass" class="swal2-input" placeholder="Confirm Password">`,
+        showCancelButton: true,
+        confirmButtonText: "Update Password",
+        preConfirm: () => {
+            const newPass = Swal.getPopup().querySelector('#newPass').value;
+            const confirmPass = Swal.getPopup().querySelector('#confirmPass').value;
+
+            if (!newPass || !confirmPass) {
+                Swal.showValidationMessage(`Both fields are required`);
+            } else if (newPass !== confirmPass) {
+                Swal.showValidationMessage(`Passwords do not match`);
+            } else if (newPass.length < 6) {
+                Swal.showValidationMessage(`Password must be at least 6 characters`);
+            }
+
+            return { new_password: newPass };
+        }
+    }).then((result) => {
+        if (result.isConfirmed) {
+            fetch("/admin/change_request_password", {
+                method: "POST",
+                headers: { "Content-Type": "application/json" },
+                body: JSON.stringify({
+                    request_id: requestId,
+                    new_password: result.value.new_password
+                })
+            })
+            .then(res => res.json())
+            .then(data => {
+                if (data.success) {
+                    Swal.fire({
+                        icon: "success",
+                        title: "Password Updated",
+                        text: `Password has been reset successfully`,
+                        timer: 1500,
+                        showConfirmButton: false
+                    });
+
+                    // Optionally mark request as Done / remove row
+                    document.querySelector(`button[onclick*="changeRequestPassword(${requestId}"]`).closest('tr').remove();
+                } else {
+                    Swal.fire("Error", data.message, "error");
+                }
+            })
+            .catch(() => {
+                Swal.fire("Error", "Server error occurred", "error");
+            });
+        }
+    });
+}
+function updateUserStatus(userId, selectEl) {
+    const newStatus = selectEl.value;
+
+    Swal.fire({
+        title: "Confirm Status Change",
+        text: `Change user status to "${newStatus}"?`,
+        icon: "question",
+        showCancelButton: true,
+        confirmButtonColor: "#0d6efd",
+        cancelButtonColor: "#6c757d",
+        confirmButtonText: "Yes, update"
+    }).then((result) => {
+        if (result.isConfirmed) {
+            fetch("/admin/update_user_status", {
+                method: "POST",
+                headers: {
+                    "Content-Type": "application/json"
+                },
+                body: JSON.stringify({
+                    user_id: userId,
+                    status: newStatus
+                })
+            })
+            .then(res => res.json())
+            .then(data => {
+                if (data.success) {
+                    Swal.fire({
+                        icon: "success",
+                        title: "Updated!",
+                        text: "User status updated successfully.",
+                        timer: 1500,
+                        showConfirmButton: false
+                    });
+                } else {
+                    Swal.fire("Error", data.message, "error");
+                    // revert selection
+                    selectEl.value = selectEl.dataset.current;
+                }
+            });
+        } else {
+            // revert selection if cancelled
+            selectEl.value = selectEl.dataset.current;
+        }
+    });
+}
+
+function changeUserPassword(userId) {
+    Swal.fire({
+        title: "Change User Password",
+        html:
+            `<input type="password" id="newPass" class="swal2-input" placeholder="New Password">
+             <input type="password" id="confirmPass" class="swal2-input" placeholder="Confirm Password">`,
+        showCancelButton: true,
+        confirmButtonText: "Update Password",
+        preConfirm: () => {
+            const newPass = Swal.getPopup().querySelector('#newPass').value;
+            const confirmPass = Swal.getPopup().querySelector('#confirmPass').value;
+
+            if (!newPass || !confirmPass) {
+                Swal.showValidationMessage(`Both fields are required`);
+            } else if (newPass !== confirmPass) {
+                Swal.showValidationMessage(`Passwords do not match`);
+            } else if (newPass.length < 6) {
+                Swal.showValidationMessage(`Password must be at least 6 characters`);
+            }
+
+            return { new_password: newPass };
+        }
+    }).then((result) => {
+        if (result.isConfirmed) {
+            fetch("/admin/change_user_password", {
+                method: "POST",
+                headers: {
+                    "Content-Type": "application/json"
+                },
+                body: JSON.stringify({
+                    user_id: userId,
+                    new_password: result.value.new_password
+                })
+            })
+            .then(res => res.json())
+            .then(data => {
+                if (data.success) {
+                    Swal.fire({
+                        icon: "success",
+                        title: "Password Updated",
+                        text: `Password for user #${userId} has been updated`,
+                        timer: 1500,
+                        showConfirmButton: false
+                    });
+                } else {
+                    Swal.fire("Error", data.message, "error");
+                }
+            })
+            .catch(() => {
+                Swal.fire("Error", "Server error occurred", "error");
+            });
+        }
+    });
+}
+function fetchProducts() {
+    const search = document.getElementById('searchInput').value;
+    const category = document.getElementById('categorySelect').value;
+
+    fetch(`/admin/fetch_products?search=${encodeURIComponent(search)}&category=${encodeURIComponent(category)}`)
+        .then(res => res.json())
+        .then(data => {
+            if (!data.success) return;
+
+            let html = `
+            <table class="table table-bordered table-hover">
+                <thead class="table-dark">
+                    <tr>
+                        <th>ID</th>
+                        <th>Name</th>
+                        <th>Price (₱)</th>
+                        <th>Description</th>
+                        <th>Variations</th>
+                        <th>Actions</th>
+                    </tr>
+                </thead>
+                <tbody>
+            `;
+
+            data.products.forEach(item => {
+                html += `
+                <tr>
+                    <td>${item.product[0]}</td>
+                    <td>${item.product[1]}</td>
+                    <td>${item.product[2]}</td>
+                    <td>${item.product[3]}</td>
+                    <td>
+                `;
+
+                if (item.variations.length > 0) {
+                    html += `
+                    <div class="dropdown">
+                        <button class="btn btn-sm btn-outline-secondary dropdown-toggle w-100" type="button" data-bs-toggle="dropdown">
+                            View Variations
+                        </button>
+                        <ul class="dropdown-menu w-100 p-2">
+                            <li class="mb-2 d-flex justify-content-between fw-bold border-bottom pb-1">
+                                <span>Variation</span>
+                                <div class="d-flex gap-2">
+                                    <span>Stock</span>
+                                    <span>Extra Price</span>
+                                </div>
+                            </li>
+                    `;
+
+                    item.variations.forEach(v => {
+                        const stockBadge = v[1] < 5
+                            ? `<span class="badge bg-danger">${v[1]}</span>`
+                            : `<span class="badge bg-success">${v[1]}</span>`;
+
+                        const priceBadge = v[2] > 0
+                            ? `<span class="badge bg-warning text-dark">+₱${parseFloat(v[2]).toFixed(2)}</span>`
+                            : `<span class="text-muted">₱0.00</span>`;
+
+                        html += `
+                        <li class="mb-1 d-flex justify-content-between align-items-center">
+                            <span>${v[0]}</span>
+                            <div class="d-flex gap-2">
+                                ${stockBadge}
+                                ${priceBadge}
+                            </div>
+                        </li>
+                        `;
+                    });
+
+                    html += `
+                        </ul>
+                    </div>
+                    `;
+                } else {
+                    html += `<span class="text-muted">No variations</span>`;
+                }
+
+                html += `
+                    </td>
+                    <td class="d-flex gap-1">
+                        <button class="btn btn-sm btn-danger" onclick="confirmDeleteProduct(${item.product[0]})">
+                            Delete
+                        </button>
+                        <a href="/admin/edit_product/${item.product[0]}" class="btn btn-sm btn-warning">
+                            Edit
+                        </a>
+                    </td>
+                </tr>
+                `;
+            });
+
+            html += `</tbody></table>`;
+            document.getElementById('productsContainer').innerHTML = html;
+        });
+}
+
+// Keep listeners
+document.getElementById('searchInput').addEventListener('input', fetchProducts);
+document.getElementById('categorySelect').addEventListener('change', fetchProducts);
+
+function confirmDeleteProduct(productId) {
+    Swal.fire({
+        title: "Delete Product?",
+        text: "This will permanently delete the product, its variations, options, and images!",
+        icon: "warning",
+        showCancelButton: true,
+        confirmButtonColor: "#dc3545",
+        cancelButtonColor: "#6c757d",
+        confirmButtonText: "Yes, delete it"
+    }).then((result) => {
+        if (result.isConfirmed) {
+            fetch(`/admin/delete_product/${productId}`, {
+                method: "POST"
+            })
+            .then(res => res.json())
+            .then(data => {
+                if (data.success) {
+                    Swal.fire({
+                        icon: "success",
+                        title: "Deleted!",
+                        text: "Product has been deleted.",
+                        timer: 1500,
+                        showConfirmButton: false
+                    }).then(() => location.reload());
+                } else {
+                    Swal.fire("Error", data.message, "error");
+                }
+            });
+        }
+    });
+}
+function confirmStatusChange(selectEl, orderId) {
+    const newStatus = selectEl.value;
+    const oldStatus = selectEl.dataset.current;
+
+    // Prevent unnecessary popup
+    if (newStatus === oldStatus) return;
+
+    Swal.fire({
+        title: "Confirm Status Change",
+        text: `Change order status to "${newStatus}"?`,
+        icon: "question",
+        showCancelButton: true,
+        confirmButtonColor: "#0d6efd",
+        cancelButtonColor: "#6c757d",
+        confirmButtonText: "Yes, update"
+    }).then((result) => {
+        if (result.isConfirmed) {
+
+            fetch("/admin/update_order_status_ajax", {
+                method: "POST",
+                headers: {
+                    "Content-Type": "application/json"
+                },
+                body: JSON.stringify({
+                    order_id: orderId,
+                    status: newStatus
+                })
+            })
+            .then(res => res.json())
+            .then(data => {
+              if (data.success) {
+
+    Swal.fire({
+        icon: "success",
+        title: "Updated!",
+        text: "Order status updated successfully.",
+        timer: 1500,
+        showConfirmButton: false
+    });
+
+    const statusText = document.getElementById("status-text-" + orderId);
+    statusText.innerText = newStatus;
+
+    statusText.className = "fw-bold d-block mb-1";
+    if (newStatus === "Delivered") statusText.classList.add("text-success");
+    else if (newStatus === "Out for Delivery") statusText.classList.add("text-primary");
+    else statusText.classList.add("text-warning");
+
+    selectEl.dataset.current = newStatus;
+
+    if (newStatus === "Delivered") {
+        document.getElementById("order-" + orderId)?.remove();
+    }
+    refreshSales();
+}
+
+            });
+
+        } else {
+            selectEl.value = oldStatus;
+        }
+    });
+}
+
+document.getElementById("filterDate").addEventListener("change", function() {
+    const selectedDate = this.value;
+
+    fetch(`/admin/sales_summary?date=${selectedDate}`)
+        .then(res => res.json())
+        .then(data => {
+            // Update cards
+            document.getElementById("dailySales").innerText = "₱" + data.daily.toFixed(2);
+            document.getElementById("weeklySales").innerText = "₱" + data.weekly.toFixed(2);
+            document.getElementById("monthlySales").innerText = "₱" + data.monthly.toFixed(2);
+
+            // Update chart
+            salesChart.data.datasets[0].data = [data.daily, data.weekly, data.monthly];
+            salesChart.update();
+        });
+});
+
+
+function updateOrderStatus(orderId, newStatus) {
+    Swal.fire({
+        title: "Confirm Status Change",
+        text: `Change order status to "${newStatus}"?`,
+        icon: "question",
+        showCancelButton: true,
+        confirmButtonColor: "#0d6efd",
+        cancelButtonColor: "#6c757d",
+        confirmButtonText: "Yes, update"
+    }).then((result) => {
+        if (result.isConfirmed) {
+            fetch("/admin/update_order_status_ajax", {
+                method: "POST",
+                headers: {
+                    "Content-Type": "application/json"
+                },
+                body: JSON.stringify({
+                    order_id: orderId,
+                    status: newStatus
+                })
+            })
+            .then(res => res.json())
+            .then(data => {
+                if (data.success) {
+                    Swal.fire({
+                        icon: "success",
+                        title: "Updated!",
+                        text: "Order status has been updated.",
+                        timer: 1500,
+                        showConfirmButton: false
+                    });
+
+                    // Remove row smoothly
+                    document.getElementById("order-" + orderId)?.remove();
+                }
+            });
+        }
+    });
+}
+
+function declineOrder(orderId) {
+    Swal.fire({
+        title: "Decline Order",
+        input: "textarea",
+        inputLabel: "Reason for declining",
+        inputPlaceholder: "Enter reason...",
+        inputAttributes: {
+            "aria-label": "Decline reason"
+        },
+        showCancelButton: true,
+        confirmButtonColor: "#dc3545",
+        confirmButtonText: "Decline Order",
+        preConfirm: (reason) => {
+            if (!reason) {
+                Swal.showValidationMessage("Reason is required");
+            }
+            return reason;
+        }
+    }).then((result) => {
+        if (result.isConfirmed) {
+            fetch("/admin/decline_order", {
+                method: "POST",
+                headers: {
+                    "Content-Type": "application/json"
+                },
+                body: JSON.stringify({
+                    order_id: orderId,
+                    reason: result.value
+                })
+            })
+            .then(res => res.json())
+            .then(data => {
+                if (data.success) {
+                    Swal.fire({
+                        icon: "success",
+                        title: "Order Declined",
+                        text: "The order has been declined.",
+                        timer: 1500,
+                        showConfirmButton: false
+                    });
+
+                    document.getElementById("order-" + orderId)?.remove();
+                }
+            });
+        }
+    });
+}
+
+function refreshSales() {
+    fetch("/admin/sales_summary")
+        .then(res => res.json())
+        .then(data => {
+
+            // Update cards
+            document.getElementById("dailySales").innerText = "₱" + data.daily.toFixed(2);
+            document.getElementById("weeklySales").innerText = "₱" + data.weekly.toFixed(2);
+            document.getElementById("monthlySales").innerText = "₱" + data.monthly.toFixed(2);
+
+            // Update chart
+            salesChart.data.datasets[0].data = [
+                data.daily,
+                data.weekly,
+                data.monthly
+            ];
+            salesChart.update();
+        });
+}
+
+const ctx = document.getElementById('salesChart');
+const salesChart = new Chart(ctx, {
+    type: 'bar',
+    data: {
+        labels: ['Daily Sales', 'Weekly Sales', 'Monthly Sales'],
+        datasets: [{
+            label: 'Sales Amount (₱)',
+            data: [
+                {{ daily_sales }},
+                {{ weekly_sales }},
+                {{ monthly_sales }}
+            ],
+            backgroundColor: [
+                'rgba(25, 135, 84, 0.7)',
+                'rgba(13, 110, 253, 0.7)',
+                'rgba(255, 193, 7, 0.7)'
+            ],
+            borderWidth: 1
+        }]
+    },
+    options: {
+        responsive: true,
+        plugins: { legend: { display: false } },
+        scales: { y: { beginAtZero: true } }
+    }
+});
+function confirmLogout(e) {
+    e.preventDefault();
+    Swal.fire({
+        title: "Logout?",
+        text: "Are you sure you want to logout?",
+        icon: "warning",
+        showCancelButton: true,
+        confirmButtonColor: "#dc3545"
+    }).then(res => {
+        if (res.isConfirmed) window.location.href = "/admin/logout";
+    });
+}
+</script>
+
+</body>
+</html>

@@ -1,0 +1,135 @@
+<!DOCTYPE html>
+<html>
+<head>
+    <title>Edit Product</title>
+    <link href="https://cdn.jsdelivr.net/npm/bootstrap@5.3.2/dist/css/bootstrap.min.css" rel="stylesheet">
+    <script src="https://cdn.jsdelivr.net/npm/sweetalert2@11"></script>
+</head>
+<body class="p-4">
+
+<form method="POST" enctype="multipart/form-data">
+
+    <h3>Edit Product</h3>
+    <input class="form-control mb-2" name="name" value="{{ product['name'] }}" required>
+    <input class="form-control mb-2" name="price" value="{{ product['price'] }}" required>
+    <textarea class="form-control mb-2" name="description">{{ product['description'] }}</textarea>
+
+    <select class="form-control mb-3" name="category" required>
+        <option value="">-- Select Category --</option>
+        <option {% if product['category']=='Clothing' %}selected{% endif %}>Clothing</option>
+        <option {% if product['category']=='Electronics' %}selected{% endif %}>Electronics</option>
+        <option {% if product['category']=='Personal Care & Beauty' %}selected{% endif %}>Personal Care & Beauty</option>
+        <option {% if product['category']=='Groceries' %}selected{% endif %}>Groceries</option>
+        <option {% if product['category']=='Appliances' %}selected{% endif %}>Appliances</option>
+        <option {% if product['category']=='Toys/Sports' %}selected{% endif %}>Toys/Sports</option>
+        <option {% if product['category']=='Shoes & Footwear' %}selected{% endif %}>Shoes & Footwear</option>
+        <option {% if product['category']=='Home Collections' %}selected{% endif %}>Home Collections</option>
+        <option {% if product['category']=='Automotive' %}selected{% endif %}>Automotive</option>
+        <option {% if product['category']=='Books' %}selected{% endif %}>Books</option>
+    </select>
+
+    <hr>
+    <h5>📷 Existing Images</h5>
+    <div class="d-flex gap-3 flex-wrap">
+        {% for img in product['images'] %}
+        <div id="img-{{ img['id'] }}">
+            <img src="/static/{{ img['url'] }}" width="120">
+            <button type="button"
+                onclick="deleteImage({{ img['id'] }})"
+                class="btn btn-sm btn-danger w-100 mt-1">
+                Delete
+            </button>
+        </div>
+        {% endfor %}
+    </div>
+
+    <hr>
+    <h5>➕ Add New Images</h5>
+    <input type="file" name="new_images[]" multiple class="form-control">
+
+    <hr>
+  <hr>
+<h5>📦 Variations & Options</h5>
+<div id="variationsContainer">
+    {% for var_id, var_data in product['variations'].items() %}
+    <div class="variation border p-3 mb-3">
+        <input type="hidden" name="var_id[]" value="{{ var_id }}">
+        <strong>{{ var_data['name'] }}</strong>
+
+        <div class="optionsContainer">
+            {% for opt in var_data['options'] %}
+            <div class="mb-2 d-flex gap-2 align-items-center">
+                <input type="hidden" name="opt_id[]" value="{{ opt['id'] }}">
+                <input type="text" value="{{ opt['value'] }}" class="form-control" readonly>
+                <input type="number" name="opt_stock[]" value="{{ opt['stock'] }}" placeholder="Stock" class="form-control" min="0">
+                <input type="number" name="opt_price[]" value="{{ opt['extra_price'] }}" placeholder="Extra Price" class="form-control" min="0" step="0.01">
+                <button type="button" class="btn btn-danger" onclick="deleteOption(this)">❌</button>
+            </div>
+            {% endfor %}
+        </div>
+        <button type="button" class="btn btn-sm btn-success mt-2" onclick="addOption(this)">➕ Add Option</button>
+    </div>
+    {% endfor %}
+</div>
+
+<button type="button" class="btn btn-primary mb-3" onclick="addVariation()">➕ Add New Variation</button>
+
+    <button type="button" class="btn btn-primary mb-3" onclick="addVariation()">➕ Add New Variation</button>
+
+    <br>
+    <button class="btn btn-success">💾 Save Changes</button>
+</form>
+
+<script>
+function deleteImage(id) {
+    Swal.fire({
+        title: "Delete image?",
+        icon: "warning",
+        showCancelButton: true,
+        confirmButtonColor: "#dc3545"
+    }).then(res => {
+        if (res.isConfirmed) {
+            fetch(`/admin/delete_product_image/${id}`, {method: "POST"})
+            .then(res => res.json())
+            .then(data => {
+                if(data.success){
+                    document.getElementById(`img-${id}`).remove();
+                }
+            });
+        }
+    });
+}
+
+function deleteOption(btn){
+    btn.parentElement.remove();
+}
+function addOption(btn){
+    const container = btn.previousElementSibling;
+    const div = document.createElement("div");
+    div.className = "mb-2 d-flex gap-2 align-items-center";
+    div.innerHTML = `
+        <input type="hidden" name="opt_id[]" value="">
+        <input type="text" name="opt_value[]" placeholder="Option Value" class="form-control">
+        <input type="number" name="opt_stock[]" placeholder="Stock" class="form-control" min="0">
+        <input type="number" name="opt_price[]" placeholder="Extra Price" class="form-control" min="0" step="0.01">
+        <button type="button" class="btn btn-danger" onclick="deleteOption(this)">❌</button>
+    `;
+    container.appendChild(div);
+}
+
+
+function addVariation(){
+    const container = document.getElementById("variationsContainer");
+    const div = document.createElement("div");
+    div.className = "variation border p-3 mb-3";
+    div.innerHTML = `
+        <input type="hidden" name="var_id[]" value="">
+        <input type="text" name="var_name[]" placeholder="Variation Name" class="form-control mb-2">
+        <div class="optionsContainer"></div>
+        <button type="button" class="btn btn-sm btn-success mt-2" onclick="addOption(this)">➕ Add Option</button>
+    `;
+    container.appendChild(div);
+}
+</script>
+</body>
+</html>

@@ -1,0 +1,606 @@
+<!DOCTYPE html>
+<html lang="en">
+<head>
+    <meta charset="UTF-8">
+    <meta name="viewport" content="width=device-width, initial-scale=1.0">
+    <title>Order #{{ order[0] }} Details</title>
+    
+<link rel="stylesheet" href="{{ url_for('static', filename='css/bootstrap.min.css') }}">
+<!-- Bootstrap Icons -->
+<!-- SweetAlert2 -->
+<script src="{{ url_for('static', filename='js/sweetalert2/dist/sweetalert2.all.min.js') }}"></script>
+
+<!-- BOOTSTRAP JS -->
+    <style>
+        :root {
+            --primary: #4f46e5;
+            --primary-dark: #4338ca;
+            --secondary: #f8fafc;
+            --text-dark: #334155;
+            --text-light: #64748b;
+            --border: #e2e8f0;
+            --shadow: 0 2px 8px rgba(0, 0, 0, 0.08);
+            --radius: 8px;
+        }
+
+        body {
+            background: #f9fafb;
+            font-family: -apple-system, BlinkMacSystemFont, 'Segoe UI', Roboto, sans-serif;
+            color: var(--text-dark);
+            line-height: 1.5;
+        }
+
+        /* Navbar */
+        .navbar {
+            background: white;
+            padding: 0.75rem 1.5rem;
+            box-shadow: 0 1px 3px rgba(0,0,0,0.08);
+            border-bottom: 1px solid var(--border);
+        }
+
+        .navbar-brand {
+            font-weight: 600;
+            font-size: 1.1rem;
+            color: var(--primary);
+        }
+
+        .navbar-brand img {
+            height: 50px;
+            width: auto;
+        }
+
+        .nav-link {
+            font-weight: 500;
+            font-size: 0.9rem;
+            color: var(--text-dark);
+            padding: 0.4rem 0.8rem !important;
+        }
+
+        .nav-link:hover {
+            color: var(--primary);
+        }
+
+        /* Container */
+        .order-container {
+            max-width: 1000px;
+            margin: 1.5rem auto;
+            padding: 1.5rem;
+            background: white;
+            border-radius: var(--radius);
+            box-shadow: var(--shadow);
+            border: 1px solid var(--border);
+        }
+
+        /* Header */
+        .order-header {
+            border-bottom: 1px solid var(--border);
+            padding-bottom: 1rem;
+            margin-bottom: 1.5rem;
+        }
+
+        .order-title {
+            font-size: 1.4rem;
+            font-weight: 600;
+            color: var(--text-dark);
+            margin: 0;
+        }
+
+        .order-subtitle {
+            color: var(--text-light);
+            font-size: 0.85rem;
+        }
+
+        /* Back Button */
+        .back-btn {
+            color: var(--text-light);
+            text-decoration: none;
+            font-weight: 500;
+            font-size: 0.9rem;
+            margin-bottom: 1rem;
+            display: inline-block;
+        }
+
+        .back-btn:hover {
+            color: var(--primary);
+        }
+
+        /* Status Badge */
+        .status-badge {
+            display: inline-block;
+            padding: 0.25rem 0.75rem;
+            border-radius: 12px;
+            font-weight: 500;
+            font-size: 0.8rem;
+            margin-top: 0.5rem;
+        }
+
+        .status-pending { background: #fef3c7; color: #92400e; }
+        .status-seller-to-pack { background: #dbeafe; color: #1e40af; }
+        .status-to-ship { background: #e0e7ff; color: #3730a3; }
+        .status-out-for-delivery { background: #f3e8ff; color: #5b21b6; }
+        .status-delivered { background: #dcfce7; color: #166534; }
+        .status-completed { background: #f1f5f9; color: #475569; }
+        .status-cancelled, .status-declined { background: #fee2e2; color: #991b1b; }
+
+        /* Info Cards */
+        .info-grid {
+            display: grid;
+            grid-template-columns: repeat(auto-fit, minmax(250px, 1fr));
+            gap: 1rem;
+            margin-bottom: 1.5rem;
+        }
+
+        .info-card {
+            background: var(--secondary);
+            border-radius: var(--radius);
+            padding: 1rem;
+            border: 1px solid var(--border);
+        }
+
+        .info-card h6 {
+            font-size: 0.9rem;
+            font-weight: 600;
+            color: var(--primary);
+            margin-bottom: 0.75rem;
+        }
+
+        .info-card p {
+            margin: 0.4rem 0;
+            color: var(--text-dark);
+            font-size: 0.85rem;
+        }
+
+        /* Table */
+        .items-table {
+            width: 100%;
+            background: white;
+            border-radius: var(--radius);
+            overflow: hidden;
+            box-shadow: var(--shadow);
+            margin: 1.5rem 0;
+            font-size: 0.85rem;
+        }
+
+        .items-table th {
+            background: var(--secondary);
+            padding: 0.75rem;
+            font-weight: 600;
+            color: var(--text-dark);
+            border-bottom: 1px solid var(--border);
+        }
+
+        .items-table td {
+            padding: 0.75rem;
+            border-bottom: 1px solid var(--border);
+        }
+
+        .items-table tbody tr:hover {
+            background: var(--secondary);
+        }
+
+        /* Total Section */
+        .total-section {
+            background: var(--secondary);
+            border-radius: var(--radius);
+            padding: 1rem;
+            margin-top: 1.5rem;
+            border: 1px solid var(--border);
+        }
+
+        .total-label {
+            font-size: 0.9rem;
+            color: var(--text-light);
+            font-weight: 500;
+        }
+
+        .total-amount {
+            font-size: 1.3rem;
+            font-weight: 600;
+            color: var(--primary);
+        }
+
+        /* Buttons */
+        .action-buttons {
+            display: flex;
+            gap: 0.75rem;
+            margin-top: 1.5rem;
+            flex-wrap: wrap;
+        }
+
+        .btn {
+            padding: 0.5rem 1rem;
+            font-weight: 500;
+            font-size: 0.85rem;
+            border-radius: 6px;
+            border: none;
+            transition: all 0.2s;
+        }
+
+        .btn:hover {
+            transform: translateY(-1px);
+        }
+
+        .btn-success {
+            background: #10b981;
+            color: white;
+        }
+
+        .btn-success:hover {
+            background: #059669;
+        }
+
+        .btn-danger {
+            background: #ef4444;
+            color: white;
+        }
+
+        .btn-danger:hover {
+            background: #dc2626;
+        }
+
+        .btn-secondary {
+            background: var(--text-light);
+            color: white;
+        }
+
+        .btn-secondary:hover {
+            background: var(--text-dark);
+        }
+
+        /* Cancellation Section */
+        .cancellation-section {
+            background: #fef2f2;
+            border: 1px solid #fee2e2;
+            border-radius: var(--radius);
+            padding: 1rem;
+            margin-top: 1rem;
+            display: none;
+        }
+
+        .cancellation-section.show {
+            display: block;
+        }
+
+        /* Responsive */
+        @media (max-width: 768px) {
+            body {
+                padding: 0;
+            }
+
+            .order-container {
+                margin: 0;
+                padding: 1rem;
+                border-radius: 0;
+                border: none;
+                box-shadow: none;
+            }
+
+            .info-grid {
+                grid-template-columns: 1fr;
+            }
+
+            .action-buttons {
+                flex-direction: column;
+            }
+
+            .btn {
+                width: 100%;
+            }
+
+            .items-table {
+                font-size: 0.8rem;
+            }
+
+            .items-table th,
+            .items-table td {
+                padding: 0.5rem;
+            }
+        }
+
+        @media (max-width: 576px) {
+            .navbar {
+                padding: 0.5rem 1rem;
+            }
+
+            .order-title {
+                font-size: 1.2rem;
+            }
+
+            .order-container {
+                padding: 0.75rem;
+            }
+        }
+    </style>
+</head>
+<body>
+
+<!-- Navbar -->
+<nav class="navbar navbar-expand-lg">
+    <div class="container-fluid">
+        <a class="navbar-brand" href="{{ url_for('home') }}">
+            <img src="{{ url_for('static', filename='images/logo-black.png') }}" alt="Logo">
+        </a>
+
+        <button class="navbar-toggler" type="button" data-bs-toggle="collapse" data-bs-target="#navMenu">
+            <span class="navbar-toggler-icon"></span>
+        </button>
+
+        <div class="collapse navbar-collapse" id="navMenu">
+            <ul class="navbar-nav ms-auto align-items-center gap-1">
+                <li class="nav-item">
+                    <a class="nav-link" href="{{ url_for('cart') }}">
+                        Cart
+                    </a>
+                </li>
+                <li class="nav-item">
+                    <a class="nav-link" href="{{ url_for('profile') }}">
+                        Profile
+                    </a>
+                </li>
+                <li class="nav-item">
+                    <a class="nav-link" href="{{ url_for('about') }}">
+                        About
+                    </a>
+                </li>
+            </ul>
+        </div>
+    </div>
+</nav>
+
+<div class="order-container">
+    <!-- Header -->
+    <div class="order-header">
+        <a href="{{ url_for('profile') }}?tab=orders" class="back-btn">
+            ← Back to Orders
+        </a>
+        
+        <div class="d-flex justify-content-between align-items-start flex-wrap gap-2">
+            <div>
+                <h1 class="order-title">Order #{{ order[0] }}</h1>
+                <p class="order-subtitle">Placed on {{ order[3] }}</p>
+            </div>
+            
+            <span class="status-badge status-{{ order[2]|replace(' ', '-')|lower }}">
+                {{ order[2] }}
+            </span>
+        </div>
+    </div>
+
+    <!-- Order Information Cards -->
+    <div class="info-grid">
+        <div class="info-card">
+            <h6>Payment Information</h6>
+            <p><strong>Method:</strong> {{ order[4] }}</p>
+            {% if order[10] and order[10] > 0 %}
+            <p><strong>Voucher Discount:</strong> -₱{{ "%.2f"|format(order[10]) }}</p>
+            {% endif %}
+        </div>
+
+        <div class="info-card">
+            <h6>Shipping Information</h6>
+            <p><strong>Name:</strong> {{ order[5] }}</p>
+            <p><strong>Number:</strong> {{ order[6] }}</p>
+            <p><strong>Adress:</strong> {{ order[7] }}</p>
+          
+        </div>
+    </div>
+
+    <!-- Order Items Table -->
+    <h6>Order Items</h6>
+    
+    <div class="table-responsive">
+        <table class="items-table">
+            <thead>
+                <tr>
+                    <th>Product</th>
+                    <th>Description</th>
+                    <th>Variation</th>
+                    <th>Qty</th>
+                    <th>Price</th>
+                    <th class="text-end">Subtotal</th>
+                </tr>
+            </thead>
+            <tbody>
+                {% for item in items %}
+                {% set product_name, description, qty, price, var_name, option_value = item %}
+                {% set subtotal = qty * price %}
+                <tr>
+                    <td>{{ product_name }}</td>
+                    <td>{{ description|truncate(60) }}</td>
+                    <td>
+                        {% if var_name and option_value %}
+                        <span class="badge bg-light text-dark" style="font-size: 0.75rem; padding: 0.2rem 0.4rem;">
+                            {{ var_name }}: {{ option_value }}
+                        </span>
+                        {% else %}
+                        <span class="text-muted">-</span>
+                        {% endif %}
+                    </td>
+                    <td>{{ qty }}</td>
+                    <td>₱{{ "%.2f"|format(price) }}</td>
+                    <td class="text-end fw-bold">₱{{ "%.2f"|format(subtotal) }}</td>
+                </tr>
+                {% endfor %}
+            </tbody>
+        </table>
+    </div>
+
+    <!-- Total Section -->
+    <div class="total-section">
+        <div class="d-flex justify-content-between align-items-center">
+            <div>
+                <div class="total-label">Order Total</div>
+                {% if order[10] and order[10] > 0 %}
+                <div class="text-muted" style="font-size: 0.8rem;">Includes voucher discount: -₱{{ "%.2f"|format(order[10]) }}</div>
+                {% endif %}
+            </div>
+            <div class="total-amount">₱{{ "%.2f"|format(order[1] - (order[10] or 0)) }}</div>
+        </div>
+    </div>
+
+    <!-- Action Buttons -->
+    <div class="action-buttons">
+        {% if order[2]|lower == 'delivered' %}
+        <a href="{{ url_for('add_review', order_id=order[0]) }}" class="btn btn-success">
+            Add Review
+        </a>
+        {% endif %}
+
+        <a href="{{ url_for('download_receipt', order_id=order[0]) }}" class="btn btn-secondary">
+            Download Receipt
+        </a>
+
+        {% if order[2]|lower == 'pending' %}
+        <button class="btn btn-danger" id="cancelBtn">
+            Cancel Order
+        </button>
+        {% endif %}
+    </div>
+
+    <!-- Cancellation Section (Hidden by default) -->
+    {% if order[2]|lower == 'pending' %}
+    <div class="cancellation-section" id="cancellationSection">
+        <h6 class="mb-2 text-danger">Cancel Order</h6>
+        <p class="text-muted mb-2" style="font-size: 0.85rem;">Please select a reason for cancellation:</p>
+        
+        <select id="cancelReason" class="form-select mb-2" style="font-size: 0.85rem;">
+            <option value="" selected disabled>Select a reason...</option>
+            <option value="Changed my mind">Changed my mind</option>
+            <option value="Ordered by mistake">Ordered by mistake</option>
+            <option value="Found a better price">Found a better price</option>
+            <option value="Delivery time too long">Delivery time too long</option>
+            <option value="Other">Other reason</option>
+        </select>
+        
+        <div class="d-flex gap-2">
+            <button class="btn btn-danger" id="confirmCancelBtn" style="font-size: 0.85rem;">
+                Confirm Cancellation
+            </button>
+            <button class="btn btn-outline-secondary" id="cancelCancelBtn" style="font-size: 0.85rem;">
+                Cancel
+            </button>
+        </div>
+    </div>
+    {% endif %}
+</div>
+
+
+<script src="{{ url_for('static', filename='js/bootstrap.bundle.min.js') }}"></script>
+
+<script>
+document.addEventListener('DOMContentLoaded', function() {
+    // Tab handling from URL
+    const params = new URLSearchParams(window.location.search);
+    const tab = params.get('tab');
+    
+    if (tab === 'orders') {
+        // This is handled on the profile page redirect
+    }
+    
+    // Cancellation functionality
+    const cancelBtn = document.getElementById('cancelBtn');
+    const cancellationSection = document.getElementById('cancellationSection');
+    const cancelReason = document.getElementById('cancelReason');
+    const confirmCancelBtn = document.getElementById('confirmCancelBtn');
+    const cancelCancelBtn = document.getElementById('cancelCancelBtn');
+    
+    if (cancelBtn && cancellationSection) {
+        // Show cancellation section
+        cancelBtn.addEventListener('click', function() {
+            cancellationSection.classList.add('show');
+            cancelBtn.style.display = 'none';
+        });
+        
+        // Hide cancellation section
+        if (cancelCancelBtn) {
+            cancelCancelBtn.addEventListener('click', function() {
+                cancellationSection.classList.remove('show');
+                cancelBtn.style.display = 'block';
+                cancelReason.value = '';
+            });
+        }
+        
+        // Confirm cancellation
+        if (confirmCancelBtn) {
+            confirmCancelBtn.addEventListener('click', function() {
+                const reason = cancelReason.value;
+                
+                if (!reason) {
+                    Swal.fire({
+                        icon: 'warning',
+                        title: 'Please select a reason',
+                        text: 'You need to select a cancellation reason.',
+                        timer: 2000
+                    });
+                    return;
+                }
+                
+                Swal.fire({
+                    title: 'Cancel this order?',
+                    text: 'This action cannot be undone.',
+                    icon: 'warning',
+                    showCancelButton: true,
+                    confirmButtonColor: '#ef4444',
+                    cancelButtonColor: '#6c757d',
+                    confirmButtonText: 'Yes, cancel it',
+                    cancelButtonText: 'Go back'
+                }).then((result) => {
+                    if (result.isConfirmed) {
+                        // Show loading
+                        Swal.fire({
+                            title: 'Processing...',
+                            text: 'Please wait while we process your request',
+                            allowOutsideClick: false,
+                            didOpen: () => {
+                                Swal.showLoading();
+                            }
+                        });
+                        
+                        // Send cancellation request
+                        fetch(`/cancel_order/{{ order[0] }}`, {
+                            method: 'POST',
+                            headers: {
+                                'Content-Type': 'application/json',
+                                'X-Requested-With': 'XMLHttpRequest'
+                            },
+                            body: JSON.stringify({ reason: reason })
+                        })
+                        .then(res => res.json())
+                        .then(data => {
+                            if (data.success) {
+                                Swal.fire({
+                                    icon: 'success',
+                                    title: 'Order Cancelled',
+                                    text: 'Your order has been cancelled successfully.',
+                                    timer: 2000,
+                                    showConfirmButton: false
+                                }).then(() => {
+                                    window.location.href = '/profile?tab=orders';
+                                });
+                            } else {
+                                Swal.fire({
+                                    icon: 'error',
+                                    title: 'Error',
+                                    text: data.message || 'Unable to cancel order',
+                                    timer: 3000
+                                });
+                            }
+                        })
+                        .catch(() => {
+                            Swal.fire({
+                                icon: 'error',
+                                title: 'Server Error',
+                                text: 'An error occurred while processing your request',
+                                timer: 3000
+                            });
+                        });
+                    }
+                });
+            });
+        }
+    }
+});
+</script>
+
+</body>
+</html>

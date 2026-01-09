@@ -1,0 +1,49 @@
+<!DOCTYPE html>
+<html>
+<head>
+    <title>Review Order</title>
+    <link href="https://cdn.jsdelivr.net/npm/bootstrap@5.3.2/dist/css/bootstrap.min.css" rel="stylesheet">
+</head>
+<body class="p-4">
+
+<h2>Review Order</h2>
+
+<h4>Shipping Address</h4>
+<p>
+    <b>{{ address.fullname }}</b><br>
+    {{ address.phone }}<br>
+    {{ address.address }}
+</p>
+
+<hr>
+
+<h4>Your Items</h4>
+
+{% for item in items %}
+<div class="d-flex align-items-center mb-2">
+    <img src="{{ url_for('static', filename=item[4]) }}" width="80" height="80" style="object-fit:cover; margin-right:15px;">
+    <div>
+        <b>{{ item[1] }}</b> (x{{ item[3] }}) <br>
+        ₱{{ '%.2f'|format(item[2] * item[3]) }}
+    </div>
+</div>
+{% endfor %}
+
+<hr>
+<h3>Total: ₱{{ '%.2f'|format(total) }}</h3>
+
+<form method="POST" action="{{ url_for('confirm_order') }}">
+    <!-- Pass selected cart IDs -->
+    {% for cid in selected_ids %}
+        <input type="hidden" name="selected_ids" value="{{ cid }}">
+    {% endfor %}
+
+    <input type="hidden" name="name" value="{{ address.fullname }}">
+    <input type="hidden" name="phone" value="{{ address.phone }}">
+    <input type="hidden" name="address" value="{{ address.address }}">
+
+    <button type="submit" class="btn btn-success w-100 mt-3">✔ Confikkrm Order</button>
+</form>
+
+</body>
+</html>

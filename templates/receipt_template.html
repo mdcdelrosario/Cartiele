@@ -1,0 +1,52 @@
+<!DOCTYPE html>
+<html>
+<head>
+    <meta charset="utf-8">
+    <title>Receipt #{{ order[0] }}</title>
+    <style>
+        body { font-family: Arial, sans-serif; font-size: 14px; }
+        h2, h4 { text-align: center; }
+        table { width: 100%; border-collapse: collapse; margin-top: 15px; }
+        table, th, td { border: 1px solid black; padding: 5px; }
+        th { background-color: #f2f2f2; }
+        .text-right { text-align: right; }
+    </style>
+</head>
+<body>
+<h2>Order Receipt</h2>
+<h4>Order #{{ order[0] }}</h4>
+<p><b>Status:</b> {{ order[2] }}</p>
+<p><b>Placed on:</b> {{ order[3] }}</p>
+<p><b>Payment Method:</b> {{ order[4] }}</p>
+<p><b>Customer Name:</b> {{ order[5] }}</p>
+<p><b>Phone:</b> {{ order[6] }}</p>
+<p><b>Address:</b> {{ order[7] }}</p>
+
+<table>
+<thead>
+<tr>
+    <th>Product</th>
+    <th>Description</th>
+    <th>Variation/Option</th>
+    <th>Qty</th>
+    <th>Price</th>
+    <th>Subtotal</th>
+</tr>
+</thead>
+<tbody>
+{% for item in order_items %}
+<tr>
+    <td>{{ item[0] }}</td>
+    <td>{{ item[1] }}</td>
+    <td>{% if item[4] and item[5] %}{{ item[4] }}: {{ item[5] }}{% else %}-{% endif %}</td>
+    <td>{{ item[2] }}</td>
+    <td>₱{{ "%.2f"|format(item[3]) }}</td>
+    <td>₱{{ "%.2f"|format(item[2]*item[3]) }}</td>
+</tr>
+{% endfor %}
+</tbody>
+</table>
+
+<h4 class="text-right">Total: ₱{{ "%.2f"|format(order[1]) }}</h4>
+</body>
+</html>

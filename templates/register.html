@@ -1,0 +1,728 @@
+<!DOCTYPE html>
+<html lang="en">
+<head>
+<meta charset="UTF-8">
+<title>Create Account</title>
+<meta name="viewport" content="width=device-width, initial-scale=1.0">
+
+<!-- OFFLINE BOOTSTRAP -->
+<link rel="stylesheet" href="{{ url_for('static', filename='css/bootstrap.min.css') }}">
+<!-- OFFLINE SWEETALERT -->
+<script src="{{ url_for('static', filename='js/sweetalert2.all.min.js') }}"></script>
+
+<style>
+:root {
+    --primary: #4f46e5;
+    --primary-dark: #4338ca;
+    --primary-light: #e0e7ff;
+    --secondary: #f8fafc;
+    --accent: #f97316;
+    --success: #10b981;
+    --warning: #f59e0b;
+    --danger: #ef4444;
+    --text-dark: #334155;
+    --text-light: #64748b;
+    --border: #e2e8f0;
+    --shadow: 0 4px 12px rgba(0, 0, 0, 0.05);
+    --shadow-hover: 0 8px 24px rgba(0, 0, 0, 0.1);
+    --radius: 10px;
+    --transition: all 0.25s ease;
+}
+
+body {
+    background: linear-gradient(135deg, #f9fafb 0%, #f1f5f9 100%);
+    font-family: -apple-system, BlinkMacSystemFont, 'Segoe UI', Roboto, sans-serif;
+    color: var(--text-dark);
+    line-height: 1.5;
+    min-height: 100vh;
+    margin: 0;
+}
+
+.auth-wrapper {
+    display: grid;
+    grid-template-columns: 1fr 1fr;
+    min-height: 100vh;
+}
+
+/* ================= LEFT PANEL ================= */
+.auth-visual {
+    background: linear-gradient(135deg, var(--primary) 0%, var(--primary-dark) 100%);
+    color: white;
+    padding: 3rem;
+    display: flex;
+    flex-direction: column;
+    justify-content: space-between;
+    position: relative;
+    overflow: hidden;
+}
+
+.auth-visual::before {
+    content: '';
+    position: absolute;
+    top: 0;
+    left: 0;
+    right: 0;
+    bottom: 0;
+}
+
+.brand {
+    display: flex;
+    align-items: center;
+    gap: 1rem;
+    margin-bottom: 3rem;
+    position: relative;
+    z-index: 2;
+}
+
+.brand img {
+    height: 50px;
+    width: auto;
+    filter: brightness(0) invert(1);
+}
+
+.brand-text {
+    font-weight: 700;
+    font-size: 1.5rem;
+    color: white;
+}
+
+.visual-content {
+    position: relative;
+    z-index: 2;
+    max-width: 500px;
+    margin: auto 0;
+}
+
+.visual-title {
+    font-size: 2.5rem;
+    font-weight: 800;
+    margin-bottom: 1.5rem;
+    line-height: 1.2;
+}
+
+.visual-subtitle {
+    font-size: 1.1rem;
+    color: rgba(255, 255, 255, 0.9);
+    margin-bottom: 2rem;
+    line-height: 1.6;
+}
+
+.features-list {
+    list-style: none;
+    padding: 0;
+    margin: 2rem 0;
+}
+
+.features-list li {
+    display: flex;
+    align-items: center;
+    gap: 1rem;
+    margin-bottom: 1rem;
+    font-size: 0.95rem;
+    color: rgba(255, 255, 255, 0.9);
+}
+
+.features-list i {
+    background: rgba(255, 255, 255, 0.1);
+    width: 32px;
+    height: 32px;
+    border-radius: 50%;
+    display: flex;
+    align-items: center;
+    justify-content: center;
+}
+
+.copyright {
+    color: rgba(255, 255, 255, 0.6);
+    font-size: 0.85rem;
+    margin-top: 2rem;
+    position: relative;
+    z-index: 2;
+}
+
+/* ================= RIGHT PANEL ================= */
+.auth-form {
+    background: white;
+    padding: 3rem;
+    display: flex;
+    align-items: center;
+    justify-content: center;
+    overflow-y: auto;
+}
+
+.form-container {
+    width: 100%;
+    max-width: 420px;
+}
+
+.form-header {
+    margin-bottom: 2rem;
+}
+
+.form-title {
+    font-size: 1.75rem;
+    font-weight: 700;
+    color: var(--text-dark);
+    margin-bottom: 0.5rem;
+}
+
+.form-subtitle {
+    color: var(--text-light);
+    font-size: 0.95rem;
+}
+
+/* ================= FORM STYLES ================= */
+.form-label {
+    font-weight: 600;
+    color: var(--text-dark);
+    margin-bottom: 0.5rem;
+    font-size: 0.9rem;
+    display: flex;
+    align-items: center;
+    gap: 0.5rem;
+}
+
+.form-label i {
+    color: var(--primary);
+    font-size: 0.9rem;
+}
+
+.form-control {
+    border: 1px solid var(--border);
+    border-radius: var(--radius);
+    padding: 0.75rem 1rem;
+    font-size: 0.95rem;
+    transition: var(--transition);
+    background: white;
+}
+
+.form-control:focus {
+    border-color: var(--primary);
+    box-shadow: 0 0 0 3px rgba(79, 70, 229, 0.1);
+    outline: none;
+}
+
+/* ================= PROFILE IMAGE ================= */
+.profile-upload-container {
+    text-align: center;
+    margin-bottom: 1.5rem;
+}
+
+.profile-preview {
+    width: 140px;
+    height: 140px;
+    border-radius: 50%;
+    object-fit: cover;
+    border: 3px solid var(--border);
+    display: none;
+    margin: 0 auto 1rem;
+    box-shadow: var(--shadow);
+    transition: var(--transition);
+}
+
+.profile-preview:hover {
+    transform: scale(1.02);
+}
+
+.upload-label {
+    display: inline-block;
+    background: var(--primary-light);
+    color: var(--primary);
+    padding: 0.75rem 1.5rem;
+    border-radius: var(--radius);
+    font-weight: 500;
+    cursor: pointer;
+    transition: var(--transition);
+    border: 1px solid var(--primary-light);
+}
+
+.upload-label:hover {
+    background: var(--primary);
+    color: white;
+}
+
+.upload-label i {
+    margin-right: 0.5rem;
+}
+
+.file-input {
+    display: none;
+}
+
+.upload-hint {
+    font-size: 0.85rem;
+    color: var(--text-light);
+    margin-top: 0.5rem;
+}
+
+/* ================= ERROR MESSAGES ================= */
+.error-container {
+    background: #fef2f2;
+    border: 1px solid #fee2e2;
+    border-radius: var(--radius);
+    padding: 1rem;
+    margin-bottom: 1.5rem;
+    display: none; /* Hidden by default, shown via JS if errors exist */
+}
+
+.error-icon {
+    color: var(--danger);
+    margin-right: 0.5rem;
+}
+
+.error-text {
+    color: var(--danger);
+    font-size: 0.85rem;
+    margin-top: 0.25rem;
+    display: none; /* Hidden by default */
+}
+
+/* ================= SUBMIT BUTTON ================= */
+.btn-submit {
+    background: linear-gradient(135deg, var(--primary) 0%, var(--primary-dark) 100%);
+    color: white;
+    border: none;
+    padding: 1rem;
+    border-radius: var(--radius);
+    font-size: 1rem;
+    font-weight: 600;
+    width: 100%;
+    transition: var(--transition);
+    display: flex;
+    align-items: center;
+    justify-content: center;
+    gap: 0.5rem;
+    margin-top: 1rem;
+}
+
+.btn-submit:hover {
+    transform: translateY(-2px);
+    box-shadow: 0 8px 25px rgba(79, 70, 229, 0.3);
+}
+
+.btn-submit:active {
+    transform: translateY(0);
+}
+
+/* ================= AUTH LINKS ================= */
+.auth-links {
+    text-align: center;
+    margin-top: 2rem;
+    padding-top: 1.5rem;
+    border-top: 1px solid var(--border);
+}
+
+.auth-links p {
+    color: var(--text-light);
+    font-size: 0.9rem;
+    margin-bottom: 0.5rem;
+}
+
+.auth-link {
+    color: var(--primary);
+    font-weight: 600;
+    text-decoration: none;
+    display: inline-flex;
+    align-items: center;
+    gap: 0.5rem;
+    transition: var(--transition);
+}
+
+.auth-link:hover {
+    color: var(--primary-dark);
+    text-decoration: underline;
+}
+
+/* ================= RESPONSIVE ================= */
+@media (max-width: 1024px) {
+    .auth-wrapper {
+        grid-template-columns: 1fr;
+    }
+    
+    .auth-visual {
+        padding: 2rem;
+        min-height: 300px;
+    }
+    
+    .visual-title {
+        font-size: 2rem;
+    }
+    
+    .brand {
+        margin-bottom: 2rem;
+    }
+}
+
+@media (max-width: 768px) {
+    .auth-visual {
+        display: none;
+    }
+    
+    .auth-form {
+        padding: 2rem 1.5rem;
+    }
+    
+    .form-title {
+        font-size: 1.5rem;
+    }
+    
+    .profile-preview {
+        width: 120px;
+        height: 120px;
+    }
+}
+
+@media (max-width: 576px) {
+    .auth-form {
+        padding: 1.5rem 1rem;
+    }
+    
+    .form-container {
+        max-width: 100%;
+    }
+}
+</style>
+</head>
+
+<body>
+
+<div class="auth-wrapper">
+    <div class="auth-visual">
+        <div>
+            <div class="brand">
+                <img src="{{ url_for('static', filename='images/logo-white.png') }}" alt="Cartiele">
+               
+            </div>
+
+            <div class="visual-content">
+                <h1 class="visual-title">Join Our Community</h1>
+                <p class="visual-subtitle">
+                    Create your account to unlock exclusive features and start your shopping journey with us.
+                </p>
+                
+                <ul class="features-list">
+                    <li>
+                        
+                        <span> - Fast and secure checkout</span>
+                    </li>
+                    <li>
+                        
+                        <span> - Track your orders in real-time</span>
+                    </li>
+                    <li>
+                        
+                        <span> - Safe and encrypted transactions</span>
+                    </li>
+                    <li>
+                        
+                        <span> - Exclusive member discounts</span>
+                    </li>
+                </ul>
+            </div>
+        </div>
+
+        <div class="copyright">
+            © 2026 Cartiele. All rights reserved.
+        </div>
+    </div>
+    <div class="auth-form">
+        <div class="form-container">
+            <div class="form-header">
+                <h1 class="form-title">Create Account</h1>
+                <p class="form-subtitle">Fill in your details to get started</p>
+            </div>
+
+            <div id="errorContainer" class="error-container">
+                <i class="bi bi-exclamation-triangle error-icon"></i>
+                <span id="errorSummary">Please fix the following errors:</span>
+                <ul id="errorList" class="mb-0 mt-2 ps-3">
+                </ul>
+            </div>
+
+            <form method="POST" enctype="multipart/form-data" id="registrationForm">
+                <div class="profile-upload-container">
+                    <img id="img-preview" class="profile-preview" alt="Profile preview">
+                    
+                    <label class="upload-label">
+                        <i class="bi bi-cloud-arrow-up"></i>
+                        Upload Profile Image
+                        <input type="file" 
+                               name="profile_img" 
+                               class="file-input" 
+                               id="profileImage"
+                               accept="image/*"
+                               onchange="previewImage(event)">
+                    </label>
+                    
+                    <div id="profileImageError" class="error-text"></div>
+                    
+                    <p class="upload-hint">Optional • JPG, PNG up to 5MB</p>
+                </div>
+
+                <div class="mb-3">
+                    <label class="form-label">
+                        <i class="bi bi-person"></i> Full Name
+                    </label>
+                    <input type="text" 
+                           name="name" 
+                           id="nameInput"
+                           class="form-control" 
+                           value="{{ form_data.get('name', '') if form_data else '' }}" 
+                           required
+                           placeholder="Enter your full name">
+                    <div id="nameError" class="error-text"></div>
+                </div>
+
+                <div class="mb-3">
+                    <label class="form-label">
+                        <i class="bi bi-envelope"></i> Email Address
+                    </label>
+                    <input type="email" 
+                           name="email" 
+                           id="emailInput"
+                           class="form-control" 
+                           value="{{ form_data.get('email', '') if form_data else '' }}" 
+                           required
+                           placeholder="Enter your email">
+                    <div id="emailError" class="error-text"></div>
+                </div>
+
+                <div class="mb-3">
+                    <label class="form-label">
+                        <i class="bi bi-lock"></i> Password
+                    </label>
+                    <input type="password" 
+                           name="password" 
+                           id="passwordInput"
+                           class="form-control" 
+                           required
+                           placeholder="Create a strong password">
+                    <div id="passwordError" class="error-text"></div>
+                    <small class="text-muted" style="font-size: 0.85rem; display: block; margin-top: 0.25rem;">
+                        Use at least 8 characters with letters and numbers
+                    </small>
+                </div>
+
+                <button type="submit" class="btn-submit" id="submitBtn">
+                    <i class="bi bi-person-plus"></i> Create Account
+                </button>
+            </form>
+
+            <div class="auth-links">
+                <p>Already have an account?</p>
+                <a href="{{ url_for('login') }}" class="auth-link">
+                    <i class="bi bi-box-arrow-in-right"></i> Sign in to your account
+                </a>
+            </div>
+        </div>
+    </div>
+
+</div>
+
+<script src="{{ url_for('static', filename='js/bootstrap.bundle.min.js') }}"></script>
+
+<script>
+
+const formData = {{ form_data|tojson|safe if form_data else '{}' }};
+const errors = {{ errors|tojson|safe if errors else '{}' }};
+const registrationSuccess = {{ registration_success|tojson|safe if registration_success else 'false' }};
+
+
+function displayErrors() {
+    const errorContainer = document.getElementById('errorContainer');
+    const errorList = document.getElementById('errorList');
+    
+    if (Object.keys(errors).length > 0) {
+        errorContainer.style.display = 'block';
+        errorList.innerHTML = '';
+        
+        for (const [field, message] of Object.entries(errors)) {
+          
+            const li = document.createElement('li');
+            li.className = 'text-danger';
+            li.style.fontSize = '0.85rem';
+            li.textContent = message;
+            errorList.appendChild(li);
+            
+          
+            const errorElement = document.getElementById(field + 'Error');
+            if (errorElement) {
+                errorElement.textContent = message;
+                errorElement.style.display = 'block';
+                
+              
+                const inputElement = document.getElementById(field + 'Input') || document.getElementById(field);
+                if (inputElement) {
+                    inputElement.style.borderColor = 'var(--danger)';
+                    inputElement.style.boxShadow = '0 0 0 3px rgba(239, 68, 68, 0.1)';
+                }
+            }
+        }
+        
+        errorContainer.scrollIntoView({ behavior: 'smooth', block: 'center' });
+    }
+}
+
+function clearErrorStyling(element) {
+    element.style.borderColor = '';
+    element.style.boxShadow = '';
+    const errorElement = document.getElementById(element.id + 'Error');
+    if (errorElement) {
+        errorElement.textContent = '';
+        errorElement.style.display = 'none';
+    }
+}
+
+
+function previewImage(event) {
+    const img = document.getElementById('img-preview');
+    const file = event.target.files[0];
+    
+    
+    const profileError = document.getElementById('profileImageError');
+    profileError.textContent = '';
+    profileError.style.display = 'none';
+    
+    if (file) {
+        if (file.size > 5 * 1024 * 1024) {
+            Swal.fire({
+                icon: 'error',
+                title: 'File Too Large',
+                text: 'Please select an image smaller than 5MB.',
+                confirmButtonText: 'OK',
+                confirmButtonColor: '#4f46e5'
+            });
+            event.target.value = '';
+            return;
+        }
+        
+      
+        const validTypes = ['image/jpeg', 'image/png', 'image/gif', 'image/webp'];
+        if (!validTypes.includes(file.type)) {
+            Swal.fire({
+                icon: 'error',
+                title: 'Invalid File Type',
+                text: 'Please select a JPG, PNG, or GIF image.',
+                confirmButtonText: 'OK',
+                confirmButtonColor: '#4f46e5'
+            });
+            event.target.value = '';
+            return;
+        }
+        
+        const reader = new FileReader();
+        reader.onload = function(e) {
+            img.src = e.target.result;
+            img.style.display = "block";
+            
+          
+            img.style.transform = 'scale(1.1)';
+            setTimeout(() => {
+                img.style.transform = 'scale(1)';
+            }, 300);
+        }
+        reader.readAsDataURL(file);
+    } else {
+        img.style.display = "none";
+    }
+}
+
+document.getElementById('registrationForm').addEventListener('submit', function(e) {
+    const nameInput = document.getElementById('nameInput');
+    const emailInput = document.getElementById('emailInput');
+    const passwordInput = document.getElementById('passwordInput');
+    const submitBtn = document.getElementById('submitBtn');
+    
+    let isValid = true;
+    const newErrors = {};
+    
+    [nameInput, emailInput, passwordInput].forEach(input => {
+        clearErrorStyling(input);
+    });
+   
+    if (!nameInput.value.trim()) {
+        newErrors.name = 'Full name is required';
+        isValid = false;
+    }
+    
+  
+    const emailRegex = /^[^\s@]+@[^\s@]+\.[^\s@]+$/;
+    if (!emailInput.value.trim()) {
+        newErrors.email = 'Email is required';
+        isValid = false;
+    } else if (!emailRegex.test(emailInput.value)) {
+        newErrors.email = 'Please enter a valid email address';
+        isValid = false;
+    }
+
+    if (!passwordInput.value) {
+        newErrors.password = 'Password is required';
+        isValid = false;
+    } else if (passwordInput.value.length < 8) {
+        newErrors.password = 'Password must be at least 8 characters long';
+        isValid = false;
+    }
+    
+    if (!isValid) {
+        e.preventDefault();
+        errors = newErrors; 
+        displayErrors();
+        
+       
+        Swal.fire({
+            icon: 'warning',
+            title: 'Validation Error',
+            text: 'Please fix the errors in the form before submitting.',
+            confirmButtonText: 'OK',
+            confirmButtonColor: '#4f46e5'
+        });
+        
+        return;
+    }
+    
+    submitBtn.innerHTML = '<i class="bi bi-hourglass-split"></i> Creating Account...';
+    submitBtn.disabled = true;
+});
+
+
+document.querySelectorAll('#nameInput, #emailInput, #passwordInput').forEach(input => {
+    input.addEventListener('input', function() {
+        clearErrorStyling(this);
+    });
+});
+
+
+document.addEventListener('DOMContentLoaded', function() {
+    displayErrors();
+    if (registrationSuccess) {
+        Swal.fire({
+            title: '🎉 Account Created!',
+            html: `
+                <div style="text-align: center; padding: 1rem;">
+                    <div style="font-size: 4rem; color: #10b981; margin: 1rem 0;">✅</div>
+                    <h3 style="color: #4f46e5; margin-bottom: 0.5rem;">Welcome to Cartiele!</h3>
+                    <p style="color: #64748b; margin-bottom: 1.5rem;">
+                        Your account has been successfully created. Redirecting to login...
+                    </p>
+                </div>
+            `,
+            icon: 'success',
+            confirmButtonText: 'Continue',
+            confirmButtonColor: '#4f46e5',
+            timer: 2000,
+            timerProgressBar: true,
+            showConfirmButton: false,
+            allowOutsideClick: false,
+            allowEscapeKey: false
+        }).then(() => {
+            window.location.href = '/login';
+        });
+    }
+
+    if (formData.name) document.getElementById('nameInput').value = formData.name;
+    if (formData.email) document.getElementById('emailInput').value = formData.email;
+});
+</script>
+
+</body>
+</html>

@@ -1,0 +1,736 @@
+<!DOCTYPE html>
+<html lang="en">
+<head>
+<meta charset="UTF-8">
+<title>{{ product.name }}</title>
+<meta name="viewport" content="width=device-width, initial-scale=1.0">
+<link rel="stylesheet" href="{{ url_for('static', filename='css/bootstrap.min.css') }}">
+    <script src="{{ url_for('static', filename='js/sweetalert2/dist/sweetalert2.all.min.js') }}"></script>
+    <script src="{{ url_for('static', filename='js/bootstrap.bundle.min.js') }}"></script>
+
+<style>
+:root {
+    --primary: #4f46e5;
+    --primary-dark: #4338ca;
+    --secondary: #f8fafc;
+    --accent: #f97316;
+    --text-dark: #334155;
+    --text-light: #64748b;
+    --border: #e2e8f0;
+    --shadow: 0 4px 12px rgba(0, 0, 0, 0.05);
+    --shadow-hover: 0 8px 24px rgba(0, 0, 0, 0.1);
+    --radius: 10px;
+    --transition: all 0.25s ease;
+}
+
+/* ===== BASE ===== */
+body {
+    background: #f9fafb;
+    font-family: -apple-system, BlinkMacSystemFont, 'Segoe UI', Roboto, sans-serif;
+    color: var(--text-dark);
+    line-height: 1.5;
+}
+
+/* ===== NAVBAR ===== */
+.navbar {
+    background: white;
+    padding: 0.75rem 1.5rem;
+    box-shadow: 0 2px 10px rgba(0,0,0,0.05);
+    border-bottom: 1px solid var(--border);
+}
+
+.navbar-brand {
+    font-weight: 700;
+    font-size: 1.25rem;
+    color: var(--primary);
+}
+
+.navbar-brand img {
+    height:50px;
+    width: auto;
+}
+
+.nav-link {
+    font-weight: 500;
+    font-size: 0.95rem;
+    color: var(--text-dark);
+    padding: 0.5rem 0.75rem !important;
+}
+
+.nav-link:hover, .nav-link.active {
+    color: var(--primary);
+}
+
+.cart-badge {
+    position: absolute;
+    top: -5px;
+    right: -5px;
+    background: var(--accent);
+    color: white;
+    font-size: 0.7rem;
+    width: 16px;
+    height: 16px;
+    border-radius: 50%;
+    display: flex;
+    align-items: center;
+    justify-content: center;
+}
+
+/* ===== PRODUCT CONTAINER ===== */
+.product-shell {
+    background: white;
+    border-radius: 16px;
+    padding: 2rem;
+    box-shadow: var(--shadow);
+    border: 1px solid var(--border);
+    margin-bottom: 2rem;
+}
+
+/* ===== BACK BUTTON ===== */
+.back-btn {
+    font-size: 0.9rem;
+    font-weight: 500;
+    color: var(--text-light);
+    text-decoration: none;
+    display: inline-flex;
+    align-items: center;
+    gap: 0.5rem;
+    margin-bottom: 1.5rem;
+    transition: var(--transition);
+}
+
+.back-btn:hover {
+    color: var(--primary);
+    transform: translateX(-4px);
+}
+
+/* ===== IMAGE GALLERY ===== */
+.main-image {
+    border-radius: 12px;
+    overflow: hidden;
+    box-shadow: var(--shadow);
+    background: var(--secondary);
+    margin-bottom: 1rem;
+}
+
+.main-image img {
+    width: 100%;
+    height: 400px;
+    object-fit: cover;
+    transition: transform .35s ease;
+}
+
+.main-image:hover img {
+    transform: scale(1.03);
+}
+
+.thumbnail-strip {
+    display: flex;
+    gap: 0.75rem;
+    margin-top: 1rem;
+    flex-wrap: wrap;
+}
+
+.thumb {
+    width: 70px;
+    height: 70px;
+    border-radius: 8px;
+    overflow: hidden;
+    cursor: pointer;
+    border: 2px solid transparent;
+    transition: var(--transition);
+    background: var(--secondary);
+    flex-shrink: 0;
+}
+
+.thumb img {
+    width: 100%;
+    height: 100%;
+    object-fit: cover;
+}
+
+.thumb:hover {
+    transform: translateY(-2px);
+}
+
+.thumb.active {
+    border-color: var(--primary);
+    box-shadow: 0 0 0 3px rgba(79, 70, 229, 0.1);
+}
+
+/* ===== PRODUCT INFO ===== */
+.product-title {
+    font-size: 1.75rem;
+    font-weight: 700;
+    color: var(--text-dark);
+    margin-bottom: 0.5rem;
+    line-height: 1.3;
+}
+
+.price {
+    font-size: 1.75rem;
+    font-weight: 800;
+    color: var(--primary);
+    margin-bottom: 1rem;
+}
+
+.desc {
+    color: var(--text-light);
+    line-height: 1.6;
+    margin-bottom: 1.5rem;
+    font-size: 0.95rem;
+}
+
+/* ===== VARIATIONS ===== */
+.variation-title {
+    font-weight: 600;
+    font-size: 1rem;
+    color: var(--text-dark);
+    margin-bottom: 0.75rem;
+}
+
+.variation-type-btn {
+    border-radius: 6px;
+    font-weight: 500;
+    font-size: 0.9rem;
+    padding: 0.5rem 1rem;
+    transition: var(--transition);
+    border: 1px solid var(--border);
+}
+
+.variation-type-btn:hover:not(.active) {
+    border-color: var(--primary);
+    color: var(--primary);
+}
+
+.variation-type-btn.active {
+    background: var(--primary);
+    color: white;
+    border-color: var(--primary);
+    box-shadow: 0 4px 12px rgba(79, 70, 229, 0.2);
+}
+
+.option-btn {
+    border-radius: 6px;
+    font-weight: 500;
+    font-size: 0.9rem;
+    padding: 0.5rem 1rem;
+    transition: var(--transition);
+    border: 1px solid var(--border);
+    margin: 0.25rem;
+}
+
+.option-btn:hover:not(:disabled) {
+    transform: translateY(-1px);
+    border-color: var(--primary);
+}
+
+.option-btn.selected {
+    background: var(--primary);
+    color: white;
+    border-color: var(--primary);
+    box-shadow: 0 4px 12px rgba(79, 70, 229, 0.2);
+}
+
+.option-btn:disabled {
+    opacity: 0.5;
+    cursor: not-allowed;
+}
+
+.option-group {
+    margin-bottom: 1.5rem;
+}
+
+/* ===== QTY ===== */
+.qty-box {
+    max-width: 150px;
+    margin: 1.5rem 0;
+}
+
+.qty-box .btn {
+    font-weight: 600;
+    width: 40px;
+    display: flex;
+    align-items: center;
+    justify-content: center;
+}
+
+.qty-box input {
+    font-weight: 600;
+    text-align: center;
+    border-color: var(--border);
+}
+
+.qty-box input:focus {
+    border-color: var(--primary);
+    box-shadow: none;
+}
+
+/* ===== ADD TO CART ===== */
+.add-to-cart-btn {
+    background: var(--primary);
+    border: none;
+    border-radius: 8px;
+    font-weight: 600;
+    font-size: 1rem;
+    padding: 1rem;
+    transition: var(--transition);
+    width: 100%;
+    color: white;
+}
+
+.add-to-cart-btn:hover {
+    background: var(--primary-dark);
+    transform: translateY(-2px);
+    box-shadow: var(--shadow-hover);
+}
+
+/* ===== REVIEWS ===== */
+.reviews-title {
+    font-size: 1.25rem;
+    font-weight: 700;
+    color: var(--text-dark);
+    margin: 2rem 0 1rem;
+    padding-bottom: 0.5rem;
+    border-bottom: 2px solid var(--border);
+}
+
+.review-card {
+    background: white;
+    border-radius: 10px;
+    padding: 1.25rem;
+    box-shadow: var(--shadow);
+    border: 1px solid var(--border);
+    margin-bottom: 1rem;
+    transition: var(--transition);
+}
+
+.review-card:hover {
+    transform: translateY(-2px);
+    box-shadow: var(--shadow-hover);
+}
+
+.review-header {
+    display: flex;
+    justify-content: space-between;
+    align-items: flex-start;
+    margin-bottom: 0.75rem;
+}
+
+.reviewer-name {
+    font-weight: 600;
+    color: var(--text-dark);
+    font-size: 0.95rem;
+}
+
+.review-date {
+    font-size: 0.8rem;
+    color: var(--text-light);
+}
+
+.stars {
+    color: #ffc107;
+    font-size: 0.9rem;
+    margin-bottom: 0.5rem;
+}
+
+.review-text {
+    color: var(--text-dark);
+    font-size: 0.9rem;
+    line-height: 1.5;
+    margin-bottom: 0.75rem;
+}
+
+.review-media {
+    margin-top: 0.75rem;
+}
+
+.review-media img,
+.review-media video {
+    max-width: 240px;
+    max-height: 240px;
+    border-radius: 8px;
+    object-fit: cover;
+}
+
+/* ===== NO REVIEWS ===== */
+.no-reviews {
+    text-align: center;
+    padding: 2rem;
+    color: var(--text-light);
+    font-style: italic;
+}
+
+/* ===== RESPONSIVE ===== */
+@media (max-width: 768px) {
+    .product-shell {
+        padding: 1.5rem;
+    }
+    
+    .main-image img {
+        height: 300px;
+    }
+    
+    .product-title {
+        font-size: 1.5rem;
+    }
+    
+    .price {
+        font-size: 1.5rem;
+    }
+    
+    .thumb {
+        width: 60px;
+        height: 60px;
+    }
+    
+    .navbar {
+        padding: 0.75rem 1rem;
+    }
+}
+
+@media (max-width: 576px) {
+    .main-image img {
+        height: 250px;
+    }
+    
+    .product-shell {
+        padding: 1rem;
+    }
+    
+    .thumbnail-strip {
+        justify-content: center;
+    }
+}
+</style>
+</head>
+
+<body>
+
+<!-- NAVBAR -->
+<nav class="navbar navbar-expand-lg">
+  <div class="container-fluid">
+    <a class="navbar-brand" href="{{ url_for('home') }}">
+      <img src="{{ url_for('static', filename='images/logo-black.png') }}" alt="Logo">
+    </a>
+
+    <button class="navbar-toggler" type="button" data-bs-toggle="collapse" data-bs-target="#navMenu">
+      <span class="navbar-toggler-icon"></span>
+    </button>
+
+    <div class="collapse navbar-collapse" id="navMenu">
+      <ul class="navbar-nav ms-auto align-items-center gap-1">
+        <li class="nav-item">
+          <a class="nav-link position-relative" href="{{ url_for('cart') }}"> Cart
+            <i class="bi bi-bag"></i>
+          </a>
+        </li>
+        <li class="nav-item">
+          <a class="nav-link" href="{{ url_for('profile') }}">
+            <i class="bi bi-person me-1"></i>Profile
+          </a>
+        </li>
+        <li class="nav-item">
+          <a class="nav-link" href="{{ url_for('about') }}">
+            <i class="bi bi-info-circle me-1"></i>About
+          </a>
+        </li>
+      </ul>
+    </div>
+  </div>
+</nav>
+
+<div class="container my-4">
+
+<a href="{{ url_for('catalog') }}" class="back-btn">
+    <i class="bi bi-arrow-left"></i> Back to Shop
+</a>
+
+<div class="product-shell">
+    <div class="row g-4">
+
+        <!-- IMAGE SECTION -->
+        <div class="col-lg-6">
+            <div class="main-image mb-2">
+                <img id="mainImage" src="{{ url_for('static', filename=product.images[0]) }}" alt="{{ product.name }}">
+            </div>
+
+            <div class="thumbnail-strip">
+                {% for img in product.images %}
+                <div class="thumb {% if loop.first %}active{% endif %}"
+                     onclick="changeImage('{{ url_for('static', filename=img) }}', this)">
+                    <img src="{{ url_for('static', filename=img) }}" alt="Product thumbnail">
+                </div>
+                {% endfor %}
+            </div>
+        </div>
+
+        <!-- PRODUCT INFO -->
+        <div class="col-lg-6">
+            <h1 class="product-title">{{ product.name }}</h1>
+            
+            <div class="price" id="displayPrice">
+                ₱{{ '%.2f'|format(product.price) }}
+            </div>
+
+            <p class="desc">{{ product.description }}</p>
+
+            {% if product.variations %}
+            <div class="variation-section">
+                <h6 class="variation-title">Choose Variation</h6>
+
+                <!-- VARIATION TYPES -->
+                <div class="d-flex gap-2 mb-3 flex-wrap">
+                    {% for var_id, var in product.variations.items() %}
+                    <button class="btn variation-type-btn"
+                            data-var-id="{{ var_id }}">
+                        {{ var.name }}
+                    </button>
+                    {% endfor %}
+                </div>
+
+                <!-- OPTIONS -->
+                {% for var_id, var in product.variations.items() %}
+                <div class="option-group d-none" data-var-id="{{ var_id }}">
+                    <div class="d-flex flex-wrap">
+                        {% for opt in var.options %}
+                        <button class="btn option-btn"
+                                data-variation="{{ var_id }}"
+                                data-option="{{ opt.id }}"
+                                data-stock="{{ opt.stock }}"
+                                data-extra="{{ opt.extra_price }}"
+                                {% if opt.stock == 0 %}disabled{% endif %}>
+                            {{ opt.value }}
+                            {% if opt.extra_price > 0 %}+₱{{ opt.extra_price }}{% endif %}
+                        </button>
+                        {% endfor %}
+                    </div>
+                </div>
+                {% endfor %}
+            </div>
+            {% endif %}
+
+            <!-- QUANTITY -->
+            <div class="d-flex align-items-center mb-4">
+                <span class="me-3">Quantity:</span>
+                <div class="input-group qty-box">
+                    <button class="btn btn-outline-secondary" onclick="changeQty(-1)">−</button>
+                    <input type="number" id="qtyInput" class="form-control" value="1" min="1">
+                    <button class="btn btn-outline-secondary" onclick="changeQty(1)">+</button>
+                </div>
+            </div>
+
+            <button class="btn add-to-cart-btn" onclick="addToCart({{ product.id }})">
+                <i class="bi bi-cart-plus me-2"></i>Add to Cart
+            </button>
+        </div>
+    </div>
+</div>
+
+<!-- REVIEWS SECTION -->
+{% if product.reviews %}
+<h4 class="reviews-title">Customer Reviews</h4>
+
+{% for r in product.reviews %}
+<div class="review-card">
+    <div class="review-header">
+        <div>
+            <div class="reviewer-name">{{ r[0] }}</div>
+            <div class="stars">
+                {% for i in range(r[1]) %}★{% endfor %}
+                {% for i in range(5 - r[1]) %}☆{% endfor %}
+            </div>
+        </div>
+        <div class="review-date">{{ r[3] }}</div>
+    </div>
+    
+    <p class="review-text">{{ r[2] }}</p>
+    
+    {% if r[4] == "image" %}
+    <div class="review-media">
+        <img src="{{ url_for('static', filename=r[5]) }}" 
+             alt="Review image" class="img-fluid">
+    </div>
+    {% endif %}
+    
+    {% if r[4] == "video" %}
+    <div class="review-media">
+        <video controls class="w-100">
+            <source src="{{ url_for('static', filename=r[5]) }}">
+        </video>
+    </div>
+    {% endif %}
+</div>
+{% endfor %}
+
+{% else %}
+<div class="no-reviews">
+    <i class="bi bi-chat-left-text" style="font-size: 2rem; opacity: 0.3;"></i>
+    <p class="mt-2">No reviews yet. Be the first to review this product!</p>
+</div>
+{% endif %}
+
+</div>
+
+<!-- SCRIPTS -->
+<script src="{{ url_for('static', filename='js/bootstrap.bundle.min.js') }}"></script>
+
+<script>
+/* ===== VARIATION & IMAGE HANDLING ===== */
+let selectedVariation = null;
+let selectedOption = null;
+let selectedExtra = 0;
+let basePrice = {{ product.price }};
+
+function changeImage(src, el) {
+    document.getElementById("mainImage").src = src;
+    document.querySelectorAll(".thumb").forEach(t => t.classList.remove("active"));
+    el.classList.add("active");
+}
+
+function changeQty(change) {
+    const input = document.getElementById("qtyInput");
+    let val = parseInt(input.value) || 1;
+    val = Math.max(1, val + change);
+    input.value = val;
+}
+
+// Variation type selection
+document.querySelectorAll(".variation-type-btn").forEach(btn => {
+    btn.addEventListener("click", function () {
+        selectedVariation = this.dataset.varId;
+        selectedOption = null;
+        selectedExtra = 0;
+
+        // Update active state
+        document.querySelectorAll(".variation-type-btn").forEach(b => b.classList.remove("active"));
+        this.classList.add("active");
+
+        // Show corresponding options
+        document.querySelectorAll(".option-group").forEach(g => g.classList.add("d-none"));
+        const group = document.querySelector(`.option-group[data-var-id="${selectedVariation}"]`);
+        if (group) group.classList.remove("d-none");
+
+        // Clear option selection
+        document.querySelectorAll(".option-btn").forEach(b => b.classList.remove("selected"));
+        updatePrice();
+    });
+});
+
+// Option selection
+document.querySelectorAll(".option-btn").forEach(btn => {
+    btn.addEventListener("click", function () {
+        if (this.disabled) return;
+        selectedOption = this.dataset.option;
+        selectedExtra = parseFloat(this.dataset.extra) || 0;
+
+        document.querySelectorAll(".option-btn").forEach(b => b.classList.remove("selected"));
+        this.classList.add("selected");
+        updatePrice();
+    });
+});
+
+function updatePrice() {
+    const totalPrice = basePrice + selectedExtra;
+    document.getElementById("displayPrice").innerHTML = 
+        `<span class="price">₱${totalPrice.toFixed(2)}</span>`;
+}
+
+function addToCart(productId) {
+    const qty = parseInt(document.getElementById("qtyInput").value) || 1;
+    
+    // Validate selection
+    if (!selectedVariation || !selectedOption) {
+        showToast("Please select a variation option", "error");
+        return;
+    }
+
+    // Send to server
+    fetch(`/add_to_cart/${productId}`, {
+        method: "POST",
+        headers: { "Content-Type": "application/json" },
+        body: JSON.stringify({
+            qty: qty,
+            variation_id: selectedVariation,
+            option_id: selectedOption
+        })
+    })
+    .then(res => res.json())
+    .then(data => {
+        if (data.success) {
+            showToast("✓ Added to cart", "success");
+        } else {
+            showToast(data.message || "Failed to add to cart", "error");
+        }
+    })
+    .catch(err => {
+        showToast("Network error. Please try again.", "error");
+    });
+}
+
+function showToast(message, type = "info") {
+    // Remove existing toast
+    const existing = document.querySelector('.custom-toast');
+    if (existing) existing.remove();
+    
+    // Create toast
+    const toast = document.createElement('div');
+    toast.className = 'custom-toast';
+    toast.innerHTML = message;
+    
+    // Style based on type
+    const styles = {
+        position: 'fixed',
+        bottom: '30px',
+        left: '50%',
+        transform: 'translateX(-50%)',
+        padding: '12px 24px',
+        borderRadius: '8px',
+        fontWeight: '500',
+        fontSize: '14px',
+        zIndex: '9999',
+        boxShadow: '0 8px 20px rgba(0,0,0,0.15)',
+        transition: 'all 0.3s ease'
+    };
+    
+    if (type === "success") {
+        styles.background = '#10b981';
+        styles.color = 'white';
+    } else if (type === "error") {
+        styles.background = '#ef4444';
+        styles.color = 'white';
+    } else {
+        styles.background = '#3b82f6';
+        styles.color = 'white';
+    }
+    
+    Object.assign(toast.style, styles);
+    
+    // Add to page
+    document.body.appendChild(toast);
+    
+    // Animate in
+    setTimeout(() => {
+        toast.style.opacity = '1';
+        toast.style.transform = 'translateX(-50%) translateY(0)';
+    }, 10);
+    
+    // Remove after delay
+    setTimeout(() => {
+        toast.style.opacity = '0';
+        toast.style.transform = 'translateX(-50%) translateY(20px)';
+        setTimeout(() => toast.remove(), 300);
+    }, 2000);
+}
+
+// Initialize first variation if exists
+document.addEventListener('DOMContentLoaded', function() {
+    const firstVarBtn = document.querySelector('.variation-type-btn');
+    if (firstVarBtn) {
+        firstVarBtn.click();
+    }
+});
+</script>
+
+</body>
+</html>

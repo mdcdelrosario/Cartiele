@@ -1,0 +1,198 @@
+<!DOCTYPE html>
+<html>
+<head>
+    <title>{{ product.name }}</title>
+    <link href="https://cdn.jsdelivr.net/npm/bootstrap@5.3.2/dist/css/bootstrap.min.css" rel="stylesheet">
+
+    <style>
+        .variation-type-btn.active {
+            background-color: #0d6efd;
+            color: white;
+        }
+
+        .option-btn {
+            margin: 5px;
+            min-width: 80px;
+        }
+
+        .option-btn.selected {
+            background-color: #0d6efd;
+            color: white;
+            border-color: #0d6efd;
+        }
+
+        .option-btn:disabled {
+            opacity: 0.4;
+            cursor: not-allowed;
+        }
+    </style>
+</head>
+
+<body class="p-4 container">
+
+<a href="/" class="btn btn-secondary mb-3">⬅ Back</a>
+
+<div class="row">
+    <div class="col-md-6">
+        <div class="carousel slide">
+            <div class="carousel-inner">
+                {% for img in product.images %}
+                <div class="carousel-item {% if loop.first %}active{% endif %}">
+                    <img src="{{ url_for('static', filename=img) }}"
+                         class="d-block w-100"
+                         style="height:350px; object-fit:cover;">
+                </div>
+                {% endfor %}
+            </div>
+        </div>
+    </div>
+
+    <div class="col-md-6">
+        <h2>{{ product.name }}</h2>
+        <h3 class="text-danger">₱{{ '%.2f'|format(product.price) }}</h3>
+        <p>{{ product.description }}</p>
+
+        {% if product.variations %}
+        <h5 class="mt-3">Choose Variation</h5>
+
+        <!-- VARIATION TYPES -->
+        <div class="d-flex gap-2 mb-3">
+            {% for var_id, var in product.variations.items() %}
+            <button type="button"
+                    class="btn btn-outline-primary variation-type-btn"
+                    data-var-id="{{ var_id }}">
+                {{ var.name }}
+            </button>
+            {% endfor %}
+        </div>
+
+        <!-- VARIATION OPTIONS -->
+        {% for var_id, var in product.variations.items() %}
+        <div class="option-group d-none" data-var-id="{{ var_id }}">
+            <h6>{{ var.name }}</h6>
+            {% for opt in var.options %}
+            <button
+                type="button"
+                class="btn btn-outline-dark option-btn"
+                data-variation="{{ var_id }}"
+                data-option="{{ opt.id }}"
+                data-stock="{{ opt.stock }}"
+                {% if opt.stock == 0 %}disabled{% endif %}
+            >
+                {{ opt.value }}
+                {% if opt.stock == 0 %}(Out of stock){% endif %}
+            </button>
+            {% endfor %}
+        </div>
+        {% endfor %}
+        {% endif %}
+
+        <!-- QUANTITY -->
+        <div class="input-group my-3" style="width:150px;">
+            <button class="btn btn-outline-secondary" onclick="changeQty(-1)">−</button>
+            <input type="number" id="qtyInput" class="form-control text-center" value="1" min="1">
+            <button class="btn btn-outline-secondary" onclick="changeQty(1)">+</button>
+        </div>
+
+        <!-- ADD TO CART -->
+        <button class="btn btn-primary btn-lg" onclick="addToCart({{ product.id }})">
+            ➕ Add to Cart
+        </button>
+    </div>
+</div>
+
+<script>
+let selectedVariation = null;
+let selectedOption = null;
+
+function changeQty(change) {
+    const input = document.getElementById("qtyInput");
+    let val = parseInt(input.value) || 1;
+    val += change;
+    if (val < 1) val = 1;
+    input.value = val;
+}
+
+/* VARIATION TYPE CLICK */
+document.querySelectorAll(".variation-type-btn").forEach(btn => {
+    btn.addEventListener("click", function () {
+        selectedVariation = this.dataset.varId;
+        selectedOption = null;
+
+        document.querySelectorAll(".variation-type-btn")
+            .forEach(b => b.classList.remove("active"));
+        this.classList.add("active");
+
+        document.querySelectorAll(".option-group")
+            .forEach(g => g.classList.add("d-none"));
+
+        const group = document.querySelector(`.option-group[data-var-id="${selectedVariation}"]`);
+        if (group) group.classList.remove("d-none");
+
+        document.querySelectorAll(".option-btn")
+            .forEach(b => b.classList.remove("selected"));
+    });
+});
+
+/* OPTION CLICK */
+document.querySelectorAll(".option-btn").forEach(btn => {
+    btn.addEventListener("click", function () {
+        if (this.disabled) return;
+
+        selectedOption = this.dataset.option;
+
+        document.querySelectorAll(".option-btn")
+            .forEach(b => b.classList.remove("selected"));
+        this.classList.add("selected");
+    });
+});
+
+/* ADD TO CART */
+function addToCart(productId) {
+    const qty = parseInt(document.getElementById("qtyInput").value) || 1;
+
+    if (!selectedVariation || !selectedOption) {
+        showToast("❌ Please select a variation option");
+        return;
+    }
+
+    fetch(`/add_to_cart/${productId}`, {
+        method: "POST",
+        headers: { "Content-Type": "application/json" },
+        body: JSON.stringify({
+            qty: qty,
+            variation_id: selectedVariation,
+            option_id: selectedOption
+        })
+    })
+    .then(res => res.json())
+    .then(data => {
+        if (data.success) {
+            showToast("✅ Added to cart");
+        } else {
+            showToast("❌ Please login first");
+        }
+    });
+}
+
+/* TOAST */
+function showToast(msg) {
+    const t = document.createElement("div");
+    t.innerText = msg;
+    t.style.position = "fixed";
+    t.style.bottom = "40px";
+    t.style.left = "50%";
+    t.style.transform = "translateX(-50%)";
+    t.style.background = "#198754";
+    t.style.color = "#fff";
+    t.style.padding = "15px 30px";
+    t.style.borderRadius = "10px";
+    t.style.fontSize = "18px";
+    t.style.zIndex = "9999";
+    document.body.appendChild(t);
+    setTimeout(() => t.remove(), 2000);
+}
+</script>
+
+</body>
+</html> 

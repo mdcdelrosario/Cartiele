@@ -1,0 +1,528 @@
+<!DOCTYPE html>
+<html lang="en">
+<head>
+    <meta charset="UTF-8">
+    <title>Your Cart | Cartiele</title>
+
+    <!-- OFFLINE BOOTSTRAP -->
+    <link rel="stylesheet" href="{{ url_for('static', filename='css/bootstrap.min.css') }}">
+    <!-- OFFLINE BOOTSTRAP ICONS -->
+    <link rel="stylesheet" href="{{ url_for('static', filename='css/bootstrap-icons.css') }}">
+    <!-- SweetAlert2 -->
+    <script src="{{ url_for('static', filename='js/sweetalert2/dist/sweetalert2.all.min.js') }}"></script>
+
+    <style>
+        :root {
+            --primary: #4f46e5;
+            --primary-dark: #4338ca;
+            --secondary: #f8fafc;
+            --accent: #f97316;
+            --text-dark: #334155;
+            --text-light: #64748b;
+            --border: #e2e8f0;
+            --shadow: 0 4px 12px rgba(0, 0, 0, 0.05);
+            --shadow-hover: 0 8px 24px rgba(0, 0, 0, 0.1);
+            --radius: 10px;
+            --transition: all 0.25s ease;
+        }
+
+        body {
+            background: #f9fafb;
+            font-family: -apple-system, BlinkMacSystemFont, 'Segoe UI', Roboto, sans-serif;
+            color: var(--text-dark);
+            line-height: 1.5;
+        }
+
+        /* ================= NAVBAR ================= */
+        .navbar {
+            background: white;
+            padding: 0.75rem 1.5rem;
+            box-shadow: 0 2px 10px rgba(0,0,0,0.05);
+            border-bottom: 1px solid var(--border);
+        }
+        
+        .navbar-brand img {
+            height: 50px;
+            width: auto;
+        }
+        
+        .nav-link {
+            font-weight: 500;
+            font-size: 0.95rem;
+            color: var(--text-dark);
+            padding: 0.5rem 0.75rem !important;
+        }
+        
+        .nav-link:hover, .nav-link.active {
+            color: var(--primary);
+        }
+        
+        .cart-badge {
+            position: absolute;
+            top: -5px;
+            right: -5px;
+            background: var(--accent);
+            color: white;
+            font-size: 0.7rem;
+            width: 16px;
+            height: 16px;
+            border-radius: 50%;
+            display: flex;
+            align-items: center;
+            justify-content: center;
+        }
+
+        /* ================= MAIN CONTENT ================= */
+        .main-content {
+            max-width: 1200px;
+            margin: 0 auto;
+            padding: 2rem 1.5rem;
+        }
+
+        /* ================= CART HEADER ================= */
+        .cart-header {
+            margin-bottom: 2rem;
+        }
+
+        .cart-title {
+            font-weight: 700;
+            font-size: 2rem;
+            color: var(--text-dark);
+            margin-bottom: 0.5rem;
+        }
+
+        .cart-subtitle {
+            color: var(--text-light);
+            font-size: 1rem;
+        }
+
+        /* ================= CART ITEM ================= */
+        .cart-item {
+            display: flex;
+            gap: 1.5rem;
+            padding: 1.5rem;
+            background: white;
+            border: 1px solid var(--border);
+            border-radius: var(--radius);
+            margin-bottom: 1rem;
+            align-items: center;
+            box-shadow: var(--shadow);
+            transition: var(--transition);
+        }
+
+        .cart-item:hover {
+            box-shadow: var(--shadow-hover);
+            border-color: var(--primary);
+        }
+
+        .cart-item img {
+            width: 120px;
+            height: 120px;
+            object-fit: cover;
+            border-radius: var(--radius);
+            border: 1px solid var(--border);
+        }
+
+        .cart-item input[type="checkbox"] {
+            width: 20px;
+            height: 20px;
+            accent-color: var(--primary);
+            cursor: pointer;
+        }
+
+        /* ================= ITEM DETAILS ================= */
+        .item-details {
+            flex: 1;
+        }
+
+        .item-name {
+            font-weight: 600;
+            font-size: 1.1rem;
+            color: var(--text-dark);
+            margin-bottom: 0.25rem;
+        }
+
+        .item-variation {
+            color: var(--text-light);
+            font-size: 0.9rem;
+            margin-bottom: 0.5rem;
+        }
+
+        .item-price {
+            font-weight: 700;
+            font-size: 1.2rem;
+            color: var(--primary);
+            margin-bottom: 1rem;
+        }
+
+        /* ================= QUANTITY CONTROLS ================= */
+        .qty-btn {
+            width: 30px;
+            height: 30px;
+            text-align: center;
+            border: 1px solid var(--border);
+            border-radius: 6px;
+            background: white;
+            cursor: pointer;
+            display: flex;
+            justify-content: center;
+            align-items: center;
+            font-weight: 600;
+            transition: var(--transition);
+        }
+
+        .qty-btn:hover {
+            background: var(--secondary);
+            border-color: var(--primary);
+            color: var(--primary);
+        }
+
+        .qty-display {
+            width: 40px;
+            text-align: center;
+            font-weight: bold;
+            font-size: 1rem;
+        }
+
+        .quantity-controls {
+            display: flex;
+            align-items: center;
+            gap: 0.5rem;
+            margin-bottom: 1rem;
+        }
+
+        /* ================= ITEM ACTIONS ================= */
+        .item-subtotal {
+            font-weight: 600;
+            color: var(--text-dark);
+            margin-bottom: 0.5rem;
+        }
+
+        .remove-btn {
+            background: none;
+            border: 1px solid #dc3545;
+            color: #dc3545;
+            padding: 0.375rem 0.75rem;
+            border-radius: 6px;
+            font-size: 0.875rem;
+            transition: var(--transition);
+            text-decoration: none;
+            display: inline-block;
+        }
+
+        .remove-btn:hover {
+            background: #dc3545;
+            color: white;
+        }
+
+        /* ================= CART SUMMARY ================= */
+        .cart-summary {
+            background: white;
+            border-radius: var(--radius);
+            padding: 1.5rem;
+            box-shadow: var(--shadow);
+            border: 1px solid var(--border);
+            margin-top: 2rem;
+        }
+
+        .total-amount {
+            font-weight: 700;
+            font-size: 1.5rem;
+            color: var(--primary);
+            margin-bottom: 1.5rem;
+        }
+
+        .checkout-btn {
+            background: var(--primary);
+            border: none;
+            color: white;
+            font-weight: 600;
+            padding: 0.75rem;
+            border-radius: var(--radius);
+            width: 100%;
+            transition: var(--transition);
+            font-size: 1rem;
+        }
+
+        .checkout-btn:hover {
+            background: var(--primary-dark);
+            transform: translateY(-2px);
+            box-shadow: 0 4px 12px rgba(79, 70, 229, 0.3);
+        }
+
+        /* ================= EMPTY CART ================= */
+        .empty-cart {
+            text-align: center;
+            padding: 3rem;
+            background: white;
+            border-radius: var(--radius);
+            box-shadow: var(--shadow);
+            border: 1px solid var(--border);
+        }
+
+        .empty-cart-icon {
+            font-size: 3rem;
+            color: var(--border);
+            margin-bottom: 1rem;
+        }
+
+        .empty-cart h3 {
+            color: var(--text-light);
+            font-weight: 500;
+            margin-bottom: 0.5rem;
+        }
+
+        .empty-cart p {
+            color: var(--text-light);
+            font-size: 0.95rem;
+        }
+
+        /* ================= BACK BUTTON ================= */
+        .back-btn {
+            display: inline-flex;
+            align-items: center;
+            gap: 0.5rem;
+            color: var(--text-light);
+            text-decoration: none;
+            font-weight: 500;
+            padding: 0.5rem 0;
+            transition: var(--transition);
+            margin-top: 1.5rem;
+        }
+
+        .back-btn:hover {
+            color: var(--primary);
+        }
+
+        /* ================= RESPONSIVE ================= */
+        @media (max-width: 768px) {
+            .main-content {
+                padding: 1.5rem 1rem;
+            }
+            
+            .cart-item {
+                flex-wrap: wrap;
+                gap: 1rem;
+            }
+            
+            .cart-item img {
+                width: 100px;
+                height: 100px;
+            }
+        }
+
+        @media (max-width: 576px) {
+            .navbar {
+                padding: 0.75rem 1rem;
+            }
+            
+            .cart-title {
+                font-size: 1.5rem;
+            }
+            
+            .cart-item {
+                padding: 1rem;
+            }
+        }
+    </style>
+</head>
+
+<body>
+    <!-- NAVBAR -->
+    <nav class="navbar navbar-expand-lg">
+        <div class="container-fluid">
+            <a class="navbar-brand" href="{{ url_for('home') }}">
+                <img src="{{ url_for('static', filename='images/logo-black.png') }}" alt="Logo">
+            </a>
+
+            <button class="navbar-toggler" type="button" data-bs-toggle="collapse" data-bs-target="#navMenu">
+                <span class="navbar-toggler-icon"></span>
+            </button>
+
+            <div class="collapse navbar-collapse" id="navMenu">
+                <ul class="navbar-nav ms-auto align-items-center gap-1">
+                    <li class="nav-item">
+                        <a class="nav-link active position-relative" href="{{ url_for('cart') }}">Cart
+                            <i class="bi bi-bag"></i>
+                            {% if items and items|length > 0 %}
+                            <span class="cart-badge">{{ items|length }}</span>
+                            {% endif %}
+                        </a>
+                    </li>
+                    <li class="nav-item">
+                        <a class="nav-link" href="{{ url_for('profile') }}">
+                            <i class="bi bi-person me-1"></i>Profile
+                        </a>
+                    </li>
+                    <li class="nav-item">
+                        <a class="nav-link" href="{{ url_for('about') }}">
+                            <i class="bi bi-info-circle me-1"></i>About
+                        </a>
+                    </li>
+                </ul>
+            </div>
+        </div>
+    </nav>
+
+    <!-- MAIN CONTENT -->
+    <div class="main-content">
+        <div class="cart-header">
+            <h1 class="cart-title">Your Shopping Cart</h1>
+            <p class="cart-subtitle">
+                {% if items %}
+                    Review and manage your items
+                {% else %}
+                    Your cart is waiting to be filled
+                {% endif %}
+            </p>
+        </div>
+
+        {% if items %}
+        <form method="POST" action="{{ url_for('checkout') }}">
+            <!-- CART ITEMS -->
+            {% for item in items %}
+            <div class="cart-item">
+                <input type="checkbox" 
+                       name="selected_items" 
+                       value="{{ item.cart_id }}" 
+                       style="width:20px;height:20px;">
+
+                <img src="{{ url_for('static', filename=item.img) }}" alt="Product Image">
+
+                <div class="item-details">
+                    <h5 class="item-name">{{ item.name }}</h5>
+                    
+                    {% if item.variation %}
+                        <p class="item-variation">{{ item.variation }}</p>
+                    {% endif %}
+                    
+                    <p class="item-price">₱{{ '%.2f'|format(item.price) }}</p>
+                    
+                    <div class="quantity-controls">
+                        <button type="button" 
+                                class="qty-btn" 
+                                onclick="updateQty({{ item.cart_id }}, 'minus', {{ item.qty }})">
+                            −
+                        </button>
+                        <span class="qty-display" id="qty-{{ item.cart_id }}">{{ item.qty }}</span>
+                        <button type="button" 
+                                class="qty-btn" 
+                                onclick="updateQty({{ item.cart_id }}, 'plus', {{ item.qty }})">
+                            +
+                        </button>
+                    </div>
+
+                    <p class="item-subtotal">Subtotal: <b>₱{{ '%.2f'|format(item.price * item.qty) }}</b></p>
+                    
+                    <a href="{{ url_for('remove_cart_item', cart_id=item.cart_id) }}" 
+                       class="remove-btn">
+                        Remove
+                    </a>
+                </div>
+            </div>
+            {% endfor %}
+
+            <!-- CART SUMMARY -->
+            <div class="cart-summary">
+                <h3 class="total-amount">Total: ₱{{ '%.2f'|format(total) }}</h3>
+                <button type="submit" class="checkout-btn">
+                    Checkout Selected Items
+                </button>
+            </div>
+        </form>
+        {% else %}
+        <!-- EMPTY CART -->
+        <div class="empty-cart">
+            <div class="empty-cart-icon">
+                <i class="bi bi-bag"></i>
+            </div>
+            <h3>Your cart is empty</h3>
+            <p>Add some items to get started!</p>
+            <a href="{{ url_for('catalog') }}" class="btn btn-primary mt-3">
+                <i class="bi bi-arrow-left me-2"></i>Continue Shopping
+            </a>
+        </div>
+        {% endif %}
+
+        <!-- BACK TO CATALOG -->
+        <a href="{{ url_for('catalog') }}" class="back-btn">
+            <i class="bi bi-arrow-left"></i> Back to Catalog
+        </a>
+    </div>
+
+    <script src="{{ url_for('static', filename='js/bootstrap.bundle.min.js') }}"></script>
+    <script>
+    // EXACT SAME FUNCTIONALITY - NO CHANGES
+    function updateQty(cartId, action, qty) {
+        // If minus and qty is 1 → confirm delete
+        if (action === "minus" && qty === 1) {
+            Swal.fire({
+                title: 'Remove item?',
+                text: "This will remove the product from your cart!",
+                icon: 'warning',
+                showCancelButton: true,
+                confirmButtonColor: '#d33',
+                cancelButtonColor: '#3085d6',
+                confirmButtonText: 'Yes, remove it!',
+                cancelButtonText: 'Cancel'
+            }).then((result) => {
+                if (result.isConfirmed) {
+                    sendUpdate(cartId, action);
+                }
+            });
+            return; // Stop further execution until user confirms
+        }
+
+        // Otherwise just update
+        sendUpdate(cartId, action);
+    }
+
+    // Actual AJAX request
+    function sendUpdate(cartId, action) {
+        fetch("/update_cart_qty_ajax", {
+            method: "POST",
+            headers: { "Content-Type": "application/json" },
+            body: JSON.stringify({ cart_id: cartId, action: action })
+        })
+        .then(res => res.json())
+        .then(data => {
+            if (!data.success) {
+                Swal.fire({
+                    icon: "warning",
+                    title: "Stock limit reached",
+                    text: data.message,
+                    confirmButtonColor: "#d33"
+                });
+                return;
+            }
+
+            if (data.removed) {
+                // Removed from cart → show SweetAlert then reload
+                Swal.fire({
+                    icon: "success",
+                    title: "Removed",
+                    text: "Product removed from cart",
+                    timer: 1200,
+                    showConfirmButton: false
+                }).then(() => location.reload());
+                return;
+            }
+
+            // Update quantity visually
+            const qtySpan = document.getElementById("qty-" + cartId);
+            if (qtySpan) qtySpan.innerText = data.qty;
+
+            // Optional: reload to update subtotal / total
+            location.reload();
+        })
+        .catch(() => {
+            Swal.fire({
+                icon: "error",
+                title: "Error",
+                text: "Something went wrong. Please try again."
+            });
+        });
+    }
+    </script>
+</body>
+</html>
